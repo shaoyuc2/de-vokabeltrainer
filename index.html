@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>🇩🇪 Deutsch A1 單字訓練</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#f5b800">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="德文A1">
+<link rel="apple-touch-icon" href="icon-512.svg">
 <style>
   :root {
     --bg: #0f0f13; --surface: #1a1a24; --surface2: #22222f; --border: #2e2e40;
@@ -1150,6 +1156,15 @@ if(getPAT()) {
   });
 } else {
   setSyncState('idle','未設定同步');
+}
+</script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('./sw.js')
+      .then(()=>console.log('SW registered'))
+      .catch(e=>console.warn('SW failed:', e));
+  });
 }
 </script>
 </body>
