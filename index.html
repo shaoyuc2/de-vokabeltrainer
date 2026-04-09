@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>🇩🇪 Deutsch A1 單字訓練</title>
+<style>
+  :root {
+    --bg: #0f0f13; --surface: #1a1a24; --surface2: #22222f; --border: #2e2e40;
+    --accent: #f5b800; --green: #22c55e; --red: #ef4444; --blue: #3b82f6;
+    --text: #f0f0f8; --text2: #9090a8; --radius: 16px; --shadow: 0 4px 24px rgba(0,0,0,0.5);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system,'Segoe UI',sans-serif; min-height: 100vh; }
+  .screen { display: none; min-height: 100vh; flex-direction: column; }
+  .screen.active { display: flex; }
+
+  /* Nav */
+  nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 16px;
+    display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 10; }
+  nav h1 { font-size: 1rem; font-weight: 700; flex: 1; }
+  .nav-xp { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--accent); }
+  .xp-bar-mini { width: 60px; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .xp-bar-fill { height: 100%; background: var(--accent); transition: width .4s; }
+  .streak-badge { background: #ff6b1a; color: #fff; padding: 2px 7px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+  .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); cursor: pointer; transition: background .3s; flex-shrink: 0; }
+  .sync-dot.synced { background: var(--green); }
+  .sync-dot.syncing { background: var(--accent); animation: pulse 1s infinite; }
+  .sync-dot.error { background: var(--red); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  /* Home */
+  .home-hero { padding: 24px 20px 12px; text-align: center; }
+  .home-hero .flag { font-size: 2.5rem; }
+  .home-hero h2 { font-size: 1.4rem; font-weight: 800; margin: 6px 0 4px; }
+  .home-hero p { color: var(--text2); font-size: 0.85rem; }
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 12px 16px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 10px; text-align: center; }
+  .stat-card .val { font-size: 1.6rem; font-weight: 800; color: var(--accent); }
+  .stat-card .lbl { font-size: 0.7rem; color: var(--text2); margin-top: 2px; }
+  .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px 16px; }
+  .mode-btn { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 18px 14px; cursor: pointer; text-align: center; transition: all .2s;
+    display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .mode-btn:hover, .mode-btn:active { border-color: var(--accent); transform: translateY(-2px); }
+  .mode-btn .icon { font-size: 1.8rem; }
+  .mode-btn .title { font-weight: 700; font-size: 0.9rem; }
+  .mode-btn .desc { font-size: 0.7rem; color: var(--text2); }
+  .due-banner { margin: 0 16px 12px; background: linear-gradient(135deg,#1a2a1a,#0f1f0f);
+    border: 1px solid #2a4a2a; border-radius: var(--radius); padding: 12px 14px;
+    display: none; align-items: center; gap: 10px; }
+  .due-banner .count { font-size: 1.4rem; font-weight: 800; color: var(--green); }
+  .due-banner .text { font-size: 0.8rem; color: var(--text2); flex: 1; }
+  .xp-section { padding: 0 16px 16px; }
+  .xp-label { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text2); margin-bottom: 5px; }
+  .xp-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .xp-bar > div { height: 100%; background: linear-gradient(90deg,#e03030,var(--accent)); transition: width .6s; }
+
+  /* Flashcard */
+  .card-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; }
+  .progress-bar-wrap { width: 100%; max-width: 480px; margin-bottom: 16px; }
+  .progress-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-bar > div { height: 100%; background: var(--accent); transition: width .3s; }
+  .progress-text { text-align: right; font-size: 0.7rem; color: var(--text2); margin-top: 3px; }
+  .flashcard { width: 100%; max-width: 480px; height: 320px; perspective: 1000px; cursor: pointer; margin-bottom: 16px; }
+  .card-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform .5s; }
+  .flashcard.flipped .card-inner { transform: rotateY(180deg); }
+  .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+    padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: var(--shadow); }
+  .card-back { transform: rotateY(180deg); }
+  .card-article { font-size: 0.8rem; color: var(--accent); font-weight: 600; letter-spacing: 1px; margin-bottom: 4px; }
+  .card-word { font-size: 2rem; font-weight: 800; text-align: center; margin-bottom: 6px; }
+  .card-plural { font-size: 0.8rem; color: var(--text2); margin-bottom: 12px; }
+  .card-emoji { font-size: 3rem; margin-bottom: 10px; }
+  .card-translation { font-size: 1.3rem; font-weight: 700; color: var(--accent); text-align: center; margin-bottom: 4px; }
+  .card-english { font-size: 0.9rem; color: var(--blue); text-align: center; margin-bottom: 10px; }
+  .card-example { font-size: 0.8rem; color: var(--text2); text-align: center; line-height: 1.6; padding: 0 8px; font-style: italic; }
+  .card-example strong { color: var(--text); font-style: normal; }
+  .tap-hint { font-size: 0.7rem; color: var(--text2); position: absolute; bottom: 12px; }
+  .speak-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 0.8rem;
+    display: flex; align-items: center; gap: 5px; margin-bottom: 12px; transition: all .2s; }
+  .speak-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .pos-badge { font-size: 0.65rem; background: var(--border); color: var(--text2); padding: 2px 7px; border-radius: 8px; position: absolute; top: 12px; }
+  .card-actions { display: flex; gap: 10px; width: 100%; max-width: 480px; }
+  .btn-know, .btn-dontknow { flex: 1; padding: 14px; border-radius: var(--radius); border: none;
+    font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all .2s; }
+  .btn-know { background: var(--green); color: #fff; }
+  .btn-know:hover { background: #16a34a; }
+  .btn-dontknow { background: var(--red); color: #fff; }
+  .btn-dontknow:hover { background: #dc2626; }
+
+  /* Quiz */
+  .quiz-header { padding: 12px 16px; }
+  .quiz-body { flex: 1; padding: 16px; display: flex; flex-direction: column; align-items: center; }
+  .quiz-question { width: 100%; max-width: 480px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 24px 20px; text-align: center; margin-bottom: 16px; box-shadow: var(--shadow); }
+  .quiz-q-article { font-size: 0.8rem; color: var(--accent); font-weight: 600; letter-spacing: 1px; margin-bottom: 4px; }
+  .quiz-q-word { font-size: 1.8rem; font-weight: 800; margin-bottom: 6px; }
+  .quiz-q-emoji { font-size: 2.2rem; margin: 6px 0; }
+  .quiz-q-hint { font-size: 0.75rem; color: var(--text2); }
+  .quiz-score { display: flex; gap: 16px; font-size: 0.85rem; }
+  .score-item { text-align: center; }
+  .score-item .n { font-size: 1.3rem; font-weight: 800; }
+  .score-item .l { font-size: 0.65rem; color: var(--text2); }
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; max-width: 480px; }
+  .choice-btn { background: var(--surface); border: 2px solid var(--border); color: var(--text);
+    padding: 12px 10px; border-radius: var(--radius); cursor: pointer; font-size: 0.85rem;
+    text-align: left; transition: all .15s; line-height: 1.4; }
+  .choice-btn:hover:not(.locked) { border-color: var(--blue); background: rgba(59,130,246,.1); }
+  .choice-btn.correct { border-color: var(--green); background: rgba(34,197,94,.15); color: var(--green); }
+  .choice-btn.wrong { border-color: var(--red); background: rgba(239,68,68,.15); color: var(--red); }
+  .choice-btn.reveal { border-color: var(--green); background: rgba(34,197,94,.1); }
+  .quiz-next-btn { margin-top: 14px; padding: 11px 28px; background: var(--accent); color: #000;
+    border: none; border-radius: var(--radius); font-size: 0.95rem; font-weight: 700;
+    cursor: pointer; display: none; }
+  .quiz-next-btn.visible { display: block; }
+
+  /* Fill */
+  .fill-body { flex: 1; padding: 16px; display: flex; flex-direction: column; align-items: center; }
+  .fill-card { width: 100%; max-width: 480px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 24px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  .fill-hint { font-size: 0.75rem; color: var(--text2); margin-bottom: 10px; }
+  .fill-sentence { font-size: 1.1rem; line-height: 2; text-align: center; margin-bottom: 12px; }
+  .fill-blank { display: inline-block; border-bottom: 2px solid var(--accent); min-width: 70px;
+    text-align: center; padding: 0 4px; color: var(--accent); }
+  .fill-trans-row { display: flex; gap: 8px; justify-content: center; margin-bottom: 14px; flex-wrap: wrap; }
+  .fill-zh { font-size: 0.85rem; color: var(--text2); }
+  .fill-en { font-size: 0.85rem; color: var(--blue); }
+  .fill-input { width: 100%; padding: 11px 14px; font-size: 1rem; background: var(--surface2);
+    border: 2px solid var(--border); border-radius: var(--radius); color: var(--text);
+    outline: none; transition: border-color .2s; text-align: center; }
+  .fill-input:focus { border-color: var(--accent); }
+  .fill-input.correct { border-color: var(--green); background: rgba(34,197,94,.1); }
+  .fill-input.wrong { border-color: var(--red); background: rgba(239,68,68,.1); }
+  .fill-feedback { text-align: center; font-size: 0.85rem; margin-top: 8px; min-height: 18px; font-weight: 600; }
+  .fill-actions { display: flex; gap: 10px; width: 100%; max-width: 480px; }
+  .fill-check-btn { flex: 1; padding: 13px; background: var(--accent); color: #000; border: none;
+    border-radius: var(--radius); font-size: 0.95rem; font-weight: 700; cursor: pointer; }
+  .fill-skip-btn { padding: 13px 18px; background: var(--surface); border: 1px solid var(--border);
+    color: var(--text2); border-radius: var(--radius); font-size: 0.85rem; cursor: pointer; }
+
+  /* Wordlist */
+  .wordlist-body { flex: 1; overflow-y: auto; }
+  .wordlist-search { padding: 10px 16px; position: sticky; top: 0; background: var(--bg); z-index: 5; }
+  .search-input { width: 100%; padding: 9px 14px; font-size: 0.9rem; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 20px; color: var(--text); outline: none; }
+  .search-input:focus { border-color: var(--accent); }
+  .word-item { padding: 11px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .word-item:hover { background: var(--surface); }
+  .word-item .w-emoji { font-size: 1.3rem; width: 26px; text-align: center; }
+  .word-item .w-de { font-weight: 600; font-size: 0.95rem; }
+  .word-item .w-article { color: var(--accent); font-size: 0.75rem; margin-right: 3px; }
+  .word-item .w-zh { color: var(--text2); font-size: 0.78rem; }
+  .word-item .w-en { color: var(--blue); font-size: 0.72rem; }
+  .word-item .w-level { margin-left: auto; font-size: 0.65rem; padding: 2px 5px; border-radius: 7px; background: var(--border); flex-shrink: 0; }
+  .level-0 { color: var(--text2); }
+  .level-1 { background: rgba(59,130,246,.2)!important; color: var(--blue); }
+  .level-2 { background: rgba(245,184,0,.2)!important; color: var(--accent); }
+  .level-3 { background: rgba(34,197,94,.2)!important; color: var(--green); }
+  .level-4,.level-5 { background: rgba(34,197,94,.35)!important; color: #16a34a; }
+  .filter-tabs { display: flex; gap: 7px; padding: 6px 16px; overflow-x: auto; }
+  .filter-tab { padding: 3px 10px; border-radius: 10px; font-size: 0.75rem; background: var(--surface);
+    border: 1px solid var(--border); color: var(--text2); cursor: pointer; white-space: nowrap; }
+  .filter-tab.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
+
+  /* Settings */
+  .settings-body { flex: 1; padding: 20px 16px; overflow-y: auto; }
+  .settings-section { margin-bottom: 24px; }
+  .settings-title { font-size: 0.8rem; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+  .settings-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+  .settings-row { display: flex; flex-direction: column; gap: 8px; }
+  .settings-label { font-size: 0.9rem; font-weight: 600; }
+  .settings-desc { font-size: 0.78rem; color: var(--text2); line-height: 1.5; }
+  .settings-input { width: 100%; padding: 10px 12px; font-size: 0.9rem; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 10px; color: var(--text); outline: none; }
+  .settings-input:focus { border-color: var(--accent); }
+  .settings-btn { padding: 10px 20px; border: none; border-radius: 10px; font-size: 0.9rem;
+    font-weight: 600; cursor: pointer; transition: all .2s; }
+  .settings-btn.primary { background: var(--accent); color: #000; }
+  .settings-btn.secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .settings-btn.danger { background: rgba(239,68,68,.15); color: var(--red); border: 1px solid var(--red); }
+  .sync-status-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; }
+  .sync-status-row { display: flex; align-items: center; gap: 10px; }
+  .sync-status-icon { font-size: 1.3rem; }
+  .sync-status-text { flex: 1; }
+  .sync-status-main { font-size: 0.9rem; font-weight: 600; }
+  .sync-status-sub { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
+
+  /* Bottom tabs */
+  .bottom-tabs { background: var(--surface); border-top: 1px solid var(--border);
+    display: flex; justify-content: space-around; padding: 6px 0;
+    position: sticky; bottom: 0; z-index: 10; }
+  .tab-btn { flex: 1; padding: 7px; background: none; border: none; color: var(--text2);
+    cursor: pointer; font-size: 0.7rem; display: flex; flex-direction: column;
+    align-items: center; gap: 2px; transition: color .2s; }
+  .tab-btn.active { color: var(--accent); }
+  .tab-btn .tab-icon { font-size: 1.2rem; }
+
+  /* Gender quiz */
+  .gender-choices { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; width: 100%; max-width: 480px; }
+  .gender-btn { border: 2px solid var(--border); border-radius: var(--radius); padding: 18px 8px;
+    cursor: pointer; font-size: 1.3rem; font-weight: 800; display: flex; flex-direction: column;
+    align-items: center; gap: 4px; transition: all .15s; background: var(--surface); color: var(--text); }
+  .gender-btn span { font-size: .68rem; font-weight: 500; color: var(--text2); }
+  .gender-btn.der { border-color: #3b82f6; color: #3b82f6; }
+  .gender-btn.die { border-color: #ec4899; color: #ec4899; }
+  .gender-btn.das { border-color: #22c55e; color: #22c55e; }
+  .gender-btn:hover:not(.locked) { transform: translateY(-2px); opacity: .85; }
+  .gender-btn.correct { background: rgba(34,197,94,.18); border-color: var(--green) !important; color: var(--green) !important; }
+  .gender-btn.wrong { background: rgba(239,68,68,.18); border-color: var(--red) !important; color: var(--red) !important; }
+  .gender-btn.reveal { background: rgba(34,197,94,.1); border-color: var(--green) !important; color: var(--green) !important; }
+
+  #toast { position: fixed; bottom: 72px; left: 50%; transform: translateX(-50%);
+    background: #333; color: #fff; padding: 7px 18px; border-radius: 18px;
+    font-size: 0.82rem; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 200; white-space: nowrap; }
+  #toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="screen-home" class="screen active">
+  <nav>
+    <h1>🇩🇪 A1 單字訓練</h1>
+    <div class="nav-xp">
+      <span id="xp-display">0 XP</span>
+      <div class="xp-bar-mini"><div class="xp-bar-fill" id="xp-bar-mini" style="width:0%"></div></div>
+    </div>
+    <div class="streak-badge" id="streak-badge">🔥 0</div>
+    <div class="sync-dot" id="sync-dot" title="同步狀態（點擊手動同步）" onclick="manualSync()"></div>
+  </nav>
+  <div class="home-hero">
+    <div class="flag">🇩🇪</div>
+    <h2>Goethe A1 單字</h2>
+    <p>685 個單字・SRS 間隔重複・中英對照</p>
+  </div>
+  <div id="due-banner" class="due-banner">
+    <div><div class="count" id="due-count">0</div><div style="font-size:.7rem;color:var(--text2)">待複習</div></div>
+    <div class="text">今天的單字在等你！</div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="val" id="stat-learned">0</div><div class="lbl">已學習</div></div>
+    <div class="stat-card"><div class="val" id="stat-mastered">0</div><div class="lbl">已熟悉</div></div>
+    <div class="stat-card"><div class="val" id="stat-streak">0</div><div class="lbl">連勝</div></div>
+  </div>
+  <div class="xp-section">
+    <div class="xp-label"><span id="level-label">Lv.1 新手</span><span id="xp-label">0/100 XP</span></div>
+    <div class="xp-bar"><div id="xp-bar-main" style="width:0%"></div></div>
+  </div>
+  <div class="mode-grid">
+    <div class="mode-btn" onclick="startMode('flash')"><div class="icon">🃏</div><div class="title">翻牌學習</div><div class="desc">SRS 智能複習</div></div>
+    <div class="mode-btn" onclick="startMode('quiz')"><div class="icon">🎯</div><div class="title">選擇題測驗</div><div class="desc">4 選 1 快速測試</div></div>
+    <div class="mode-btn" onclick="startMode('fill')"><div class="icon">✍️</div><div class="title">填空挑戰</div><div class="desc">例句填入單字</div></div>
+    <div class="mode-btn" onclick="startMode('gender')"><div class="icon">⚧️</div><div class="title">冠詞判斷</div><div class="desc">der / die / das</div></div>
+    <div class="mode-btn" onclick="showScreen('wordlist')" style="grid-column:span 2"><div class="icon">📚</div><div class="title">單字本</div><div class="desc">全部 685 個詞</div></div>
+  </div>
+  <div class="bottom-tabs">
+    <button class="tab-btn active" onclick="showScreen('home')"><span class="tab-icon">🏠</span>首頁</button>
+    <button class="tab-btn" onclick="showScreen('wordlist')"><span class="tab-icon">📚</span>單字本</button>
+    <button class="tab-btn" onclick="showScreen('settings')"><span class="tab-icon">⚙️</span>設定</button>
+  </div>
+</div>
+
+<!-- FLASHCARD -->
+<div id="screen-flash" class="screen">
+  <nav>
+    <button onclick="showScreen('home')" style="background:none;border:none;color:var(--text);cursor:pointer;font-size:1.1rem;padding:0">←</button>
+    <h1>翻牌學習</h1>
+    <div class="nav-xp"><span id="flash-xp-display">0 XP</span><div class="xp-bar-mini"><div class="xp-bar-fill" id="flash-xp-bar" style="width:0%"></div></div></div>
+    <div class="streak-badge" id="flash-streak">🔥 0</div>
+  </nav>
+  <div class="card-area">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar"><div id="flash-progress-bar" style="width:0%"></div></div>
+      <div class="progress-text"><span id="flash-progress-text">0/0</span></div>
+    </div>
+    <div id="flashcard" class="flashcard" onclick="flipCard()">
+      <div class="card-inner">
+        <div class="card-face card-front">
+          <div class="pos-badge" id="card-pos">名詞</div>
+          <div class="card-article" id="card-article"></div>
+          <div class="card-word" id="card-word">Bahnhof</div>
+          <div class="card-plural" id="card-plural"></div>
+          <button class="speak-btn" id="speak-front" onclick="event.stopPropagation();speakWord()">🔊 朗讀</button>
+          <div class="tap-hint">點擊翻牌 →</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-emoji" id="card-emoji">📖</div>
+          <div class="card-translation" id="card-translation"></div>
+          <div class="card-english" id="card-english"></div>
+          <div class="card-example" id="card-example"></div>
+          <button class="speak-btn" onclick="event.stopPropagation();speakExample()" style="margin-top:10px">🔊 例句</button>
+        </div>
+      </div>
+    </div>
+    <div class="card-actions" id="card-actions" style="display:none">
+      <button class="btn-dontknow" onclick="cardAnswer(false)">✕ 不會</button>
+      <button class="btn-know" onclick="cardAnswer(true)">✓ 會了</button>
+    </div>
+    <div id="card-actions-hint" style="font-size:.7rem;color:var(--text2);margin-top:6px">翻牌後選擇</div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="screen-quiz" class="screen">
+  <nav>
+    <button onclick="showScreen('home')" style="background:none;border:none;color:var(--text);cursor:pointer;font-size:1.1rem;padding:0">←</button>
+    <h1>選擇題測驗</h1>
+    <div class="nav-xp"><span id="quiz-xp-display">0 XP</span></div>
+    <div class="streak-badge" id="quiz-streak">🔥 0</div>
+  </nav>
+  <div class="quiz-header">
+    <div class="progress-bar"><div id="quiz-progress-bar" style="width:0%"></div></div>
+    <div style="display:flex;justify-content:space-between;margin-top:5px">
+      <span style="font-size:.7rem;color:var(--text2)" id="quiz-progress-text">1/20</span>
+      <div class="quiz-score">
+        <div class="score-item"><div class="n" id="quiz-correct" style="color:var(--green)">0</div><div class="l">正確</div></div>
+        <div class="score-item"><div class="n" id="quiz-wrong-count" style="color:var(--red)">0</div><div class="l">錯誤</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="quiz-body">
+    <div class="quiz-question">
+      <div class="quiz-q-article" id="quiz-q-article"></div>
+      <div class="quiz-q-word" id="quiz-q-word"></div>
+      <div class="quiz-q-hint" id="quiz-q-hint"></div>
+      <button class="speak-btn" style="margin:10px auto 0" onclick="speakQuizWord()">🔊 朗讀</button>
+    </div>
+    <div class="choices" id="choices"></div>
+    <button class="quiz-next-btn" id="quiz-next-btn" onclick="nextQuizQuestion()">下一題 →</button>
+  </div>
+</div>
+
+<!-- FILL -->
+<div id="screen-fill" class="screen">
+  <nav>
+    <button onclick="showScreen('home')" style="background:none;border:none;color:var(--text);cursor:pointer;font-size:1.1rem;padding:0">←</button>
+    <h1>填空挑戰</h1>
+    <div class="nav-xp"><span id="fill-xp-display">0 XP</span></div>
+    <div class="streak-badge" id="fill-streak">🔥 0</div>
+  </nav>
+  <div class="quiz-header">
+    <div class="progress-bar"><div id="fill-progress-bar" style="width:0%"></div></div>
+    <div style="display:flex;justify-content:space-between;margin-top:5px">
+      <span style="font-size:.7rem;color:var(--text2)" id="fill-progress-text">1/15</span>
+      <div class="quiz-score">
+        <div class="score-item"><div class="n" id="fill-correct" style="color:var(--green)">0</div><div class="l">正確</div></div>
+        <div class="score-item"><div class="n" id="fill-wrong-count" style="color:var(--red)">0</div><div class="l">錯誤</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="fill-body">
+    <div class="fill-card">
+      <div class="fill-hint">🔍 將正確的德文單字填入空格</div>
+      <div class="fill-sentence" id="fill-sentence"></div>
+      <div class="fill-trans-row">
+        <span class="fill-zh" id="fill-zh"></span>
+        <span style="color:var(--border)">|</span>
+        <span class="fill-en" id="fill-en"></span>
+      </div>
+      <input class="fill-input" id="fill-input" type="text" placeholder="輸入德文單字..."
+             autocomplete="off" autocorrect="off" spellcheck="false"
+             onkeydown="if(event.key==='Enter')checkFill()"/>
+      <div class="fill-feedback" id="fill-feedback"></div>
+    </div>
+    <div class="fill-actions">
+      <button class="fill-skip-btn" onclick="skipFill()">跳過</button>
+      <button class="fill-check-btn" onclick="checkFill()">確認 ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- GENDER QUIZ -->
+<div id="screen-gender" class="screen">
+  <nav>
+    <button onclick="showScreen('home')" style="background:none;border:none;color:var(--text);cursor:pointer;font-size:1.1rem;padding:0">←</button>
+    <h1>冠詞判斷</h1>
+    <div class="nav-xp"><span id="gender-xp-display">0 XP</span></div>
+    <div class="streak-badge" id="gender-streak">🔥 0</div>
+  </nav>
+  <div class="quiz-header">
+    <div class="progress-bar"><div id="gender-progress-bar" style="width:0%"></div></div>
+    <div style="display:flex;justify-content:space-between;margin-top:5px">
+      <span style="font-size:.7rem;color:var(--text2)" id="gender-progress-text">1/20</span>
+      <div class="quiz-score">
+        <div class="score-item"><div class="n" id="gender-correct" style="color:var(--green)">0</div><div class="l">正確</div></div>
+        <div class="score-item"><div class="n" id="gender-wrong-count" style="color:var(--red)">0</div><div class="l">錯誤</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="quiz-body">
+    <div class="quiz-question" style="padding:32px 20px">
+      <div style="font-size:.75rem;color:var(--text2);margin-bottom:8px">這個名詞的冠詞是？</div>
+      <div id="gender-q-word" style="font-size:2.2rem;font-weight:800;margin-bottom:6px"></div>
+      <div id="gender-q-plural" style="font-size:.8rem;color:var(--text2);margin-bottom:8px"></div>
+      <div id="gender-q-translation" style="font-size:1rem;color:var(--accent);margin-bottom:4px"></div>
+      <div id="gender-q-english" style="font-size:.82rem;color:var(--blue)"></div>
+      <button class="speak-btn" style="margin:12px auto 0" onclick="speakGenderWord()">🔊 朗讀</button>
+    </div>
+    <div class="gender-choices" id="gender-choices">
+      <button class="gender-btn der" id="gbtn-der" onclick="answerGender('der')">der<span>陽性</span></button>
+      <button class="gender-btn die" id="gbtn-die" onclick="answerGender('die')">die<span>陰性</span></button>
+      <button class="gender-btn das" id="gbtn-das" onclick="answerGender('das')">das<span>中性</span></button>
+    </div>
+    <div id="gender-feedback" style="font-size:.9rem;font-weight:600;text-align:center;margin-top:14px;min-height:20px"></div>
+  </div>
+</div>
+
+<!-- WORDLIST -->
+<div id="screen-wordlist" class="screen">
+  <nav>
+    <button onclick="showScreen('home')" style="background:none;border:none;color:var(--text);cursor:pointer;font-size:1.1rem;padding:0">←</button>
+    <h1>單字本</h1>
+    <span style="color:var(--text2);font-size:.82rem" id="wordlist-count">685 字</span>
+  </nav>
+  <div class="wordlist-search">
+    <input class="search-input" id="search-input" placeholder="🔍 搜尋德文、中文或英文..." oninput="filterWordList()">
+  </div>
+  <div class="filter-tabs" id="filter-tabs">
+    <div class="filter-tab active" onclick="setFilter('all',this)">全部</div>
+    <div class="filter-tab" onclick="setFilter('due',this)">待複習</div>
+    <div class="filter-tab" onclick="setFilter('new',this)">未學習</div>
+    <div class="filter-tab" onclick="setFilter('noun',this)">名詞</div>
+    <div class="filter-tab" onclick="setFilter('verb',this)">動詞</div>
+    <div class="filter-tab" onclick="setFilter('other',this)">其他</div>
+  </div>
+  <div class="wordlist-body" id="wordlist-body"></div>
+  <div class="bottom-tabs">
+    <button class="tab-btn" onclick="showScreen('home')"><span class="tab-icon">🏠</span>首頁</button>
+    <button class="tab-btn active" onclick="showScreen('wordlist')"><span class="tab-icon">📚</span>單字本</button>
+    <button class="tab-btn" onclick="showScreen('settings')"><span class="tab-icon">⚙️</span>設定</button>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div id="screen-settings" class="screen">
+  <nav>
+    <button onclick="showScreen('home')" style="background:none;border:none;color:var(--text);cursor:pointer;font-size:1.1rem;padding:0">←</button>
+    <h1>設定</h1>
+  </nav>
+  <div class="settings-body">
+
+    <!-- Sync Status -->
+    <div class="settings-section">
+      <div class="settings-title">同步狀態</div>
+      <div class="sync-status-card">
+        <div class="sync-status-row">
+          <div class="sync-status-icon" id="settings-sync-icon">⚪</div>
+          <div class="sync-status-text">
+            <div class="sync-status-main" id="settings-sync-main">尚未設定同步</div>
+            <div class="sync-status-sub" id="settings-sync-sub">設定 GitHub PAT 以啟用跨裝置同步</div>
+          </div>
+        </div>
+      </div>
+      <button class="settings-btn primary" onclick="manualSync()" style="width:100%">🔄 立即同步</button>
+    </div>
+
+    <!-- GitHub PAT -->
+    <div class="settings-section">
+      <div class="settings-title">GitHub 同步設定</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <div class="settings-label">GitHub Personal Access Token</div>
+          <div class="settings-desc">
+            前往 <strong>github.com → Settings → Developer settings → Personal access tokens → Tokens (classic)</strong><br>
+            建立新 token，勾選 <strong>gist</strong> 權限，複製貼上。<br>
+            每台裝置各輸入一次，進度會自動雙向同步。
+          </div>
+          <input class="settings-input" id="pat-input" type="password" placeholder="ghp_xxxxxxxxxxxx..." />
+          <div style="display:flex;gap:8px;margin-top:4px">
+            <button class="settings-btn primary" onclick="savePAT()" style="flex:1">儲存並測試</button>
+            <button class="settings-btn secondary" onclick="togglePatVisibility()">👁</button>
+          </div>
+          <div id="pat-status" style="font-size:.78rem;margin-top:6px;min-height:18px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="settings-section">
+      <div class="settings-title">學習統計</div>
+      <div class="settings-card" id="stats-detail" style="font-size:.85rem;line-height:2;color:var(--text2)"></div>
+    </div>
+
+    <!-- Danger zone -->
+    <div class="settings-section">
+      <div class="settings-title">重置</div>
+      <div class="settings-card">
+        <button class="settings-btn danger" onclick="confirmReset()" style="width:100%">⚠️ 清除所有學習進度</button>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-tabs">
+    <button class="tab-btn" onclick="showScreen('home')"><span class="tab-icon">🏠</span>首頁</button>
+    <button class="tab-btn" onclick="showScreen('wordlist')"><span class="tab-icon">📚</span>單字本</button>
+    <button class="tab-btn active" onclick="showScreen('settings')"><span class="tab-icon">⚙️</span>設定</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+// VOCAB DATA
+// ══════════════════════════════════════════════════════════════════
+const VOCAB = [{"article": "", "word": "aber", "plural": "", "pos": "other", "examples": ["Ich bin oft im Büro, aber nur für wenige Stunden."], "translation": "但是", "emoji": "↔️", "english": "but, however"}, {"article": "", "word": "abfahren", "plural": "", "pos": "verb", "examples": ["Wir fahren um zwölf Uhr ab."], "translation": "出發", "emoji": "🚂", "english": "to depart"}, {"article": "die", "word": "Abfahrt", "plural": "", "pos": "noun", "examples": ["Vor der Abfahrt rufe ich an."], "translation": "出發", "emoji": "🚂", "english": "departure"}, {"article": "", "word": "abgeben", "plural": "", "pos": "verb", "examples": ["Ich muss meine Schlüssel abgeben."], "translation": "交出、遞交", "emoji": "📦", "english": "to hand in, submit"}, {"article": "", "word": "abholen", "plural": "", "pos": "verb", "examples": ["Wann kann ich den Schrank bei dir abholen?", "Wir müssen noch meinen Bruder abholen."], "translation": "取回、接送", "emoji": "🚗", "english": "to pick up, collect"}, {"article": "der", "word": "Absender", "plural": "", "pos": "noun", "examples": ["Da ist ein Brief für dich ohne Absender."], "translation": "寄件人", "emoji": "✉️", "english": "sender"}, {"article": "", "word": "Achtung", "plural": "", "pos": "exclamation", "examples": ["Achtung! Das dürfen Sie nicht tun."], "translation": "注意！", "emoji": "⚠️", "english": "attention!, watch out!"}, {"article": "die", "word": "Adresse", "plural": "-en", "pos": "noun", "examples": ["Können Sie mir seine Adresse sagen?"], "translation": "地址", "emoji": "🏠", "english": "address"}, {"article": "", "word": "all", "plural": "", "pos": "other", "examples": ["Alles Gute!", "Das ist alles.", "Sind alle da?", "Alle Freunde kommen.", "Hast du alles?"], "translation": "全部、所有", "emoji": "🌐", "english": "all, everything"}, {"article": "", "word": "allein", "plural": "", "pos": "other", "examples": ["Er kommt allein."], "translation": "獨自", "emoji": "🧍", "english": "alone"}, {"article": "", "word": "also", "plural": "", "pos": "other", "examples": ["Also, es ist so: ...", "Er hat Zeit, also muss er uns helfen."], "translation": "所以、那麼", "emoji": "💡", "english": "so, therefore"}, {"article": "", "word": "alt", "plural": "", "pos": "other", "examples": ["Wie alt sind Sie?", "Sie sehen aber nicht so alt aus.", "Mein Auto ist schon sehr alt.", "Wir wohnen in einem sehr alten Haus.", "Köln ist eine alte Stadt."], "translation": "舊的", "emoji": "👴", "english": "old"}, {"article": "das", "word": "Alter", "plural": "", "pos": "noun", "examples": ["Alter: 26 Jahre."], "translation": "年齡", "emoji": "🎂", "english": "age"}, {"article": "", "word": "an", "plural": "", "pos": "other", "examples": ["Fahren Sie an der nächsten Straße nach rechts.", "Wir treffen uns am Bahnhof.", "Am nächsten Montag geht es leider nicht."], "translation": "在…旁、到", "emoji": "📍", "english": "at, on, to"}, {"article": "", "word": "anbieten", "plural": "", "pos": "verb", "examples": ["Was darf ich dir anbieten?"], "translation": "提供", "emoji": "🤲", "english": "to offer"}, {"article": "das", "word": "Angebot", "plural": "-e", "pos": "noun", "examples": ["Heute sind Sportschuhe im Angebot."], "translation": "優惠、提議", "emoji": "🏷️", "english": "offer, deal"}, {"article": "", "word": "ander", "plural": "", "pos": "other", "examples": ["WiIlst du diese Jacke?", "– Nein, ich möchte die andere."], "translation": "其他的", "emoji": "🔄", "english": "other, different"}, {"article": "", "word": "anfangen", "plural": "", "pos": "verb", "examples": ["Hier fängt die Bahnhofstraße an.", "Der Unterricht fängt gleich an."], "translation": "開始", "emoji": "▶️", "english": "to begin, start"}, {"article": "der", "word": "Anfang", "plural": "", "pos": "noun", "examples": ["Sie wohnt am Anfang der Straße.", "Wir machen Anfang Juli Urlaub."], "translation": "開始、起點", "emoji": "🏁", "english": "beginning, start"}, {"article": "", "word": "anklicken", "plural": "", "pos": "verb", "examples": ["Da musst du dieses Wort anklicken."], "translation": "點擊", "emoji": "🖱️", "english": "to click"}, {"article": "", "word": "ankommen", "plural": "", "pos": "verb", "examples": ["Wann kommt dieser Zug in Hamburg an?"], "translation": "抵達", "emoji": "🛬", "english": "to arrive"}, {"article": "die", "word": "Ankunft", "plural": "", "pos": "noun", "examples": ["Auf diesem Plan steht nur die Ankunft(-szeit) der Züge."], "translation": "抵達", "emoji": "🛬", "english": "arrival"}, {"article": "", "word": "ankreuzen", "plural": "", "pos": "verb", "examples": ["Auf dem Formular müssen Sie an mehreren Stellen etwas ankreuzen."], "translation": "打勾、勾選", "emoji": "☑️", "english": "to tick, check"}, {"article": "", "word": "anmachen", "plural": "", "pos": "verb", "examples": ["Mach bitte das Licht an!"], "translation": "打開（電器）", "emoji": "💡", "english": "to turn on"}, {"article": "", "word": "anmelden", "plural": "", "pos": "verb", "reflexive": true, "examples": ["Wo kann ich mich anmelden?"], "translation": "登記、報名", "emoji": "📝", "english": "to register, sign up"}, {"article": "die", "word": "Anmeldung", "plural": "", "pos": "noun", "examples": ["Eine Anmeldung für diesen Kurs ist nicht mehr möglich."], "translation": "登記、報名", "emoji": "📝", "english": "registration"}, {"article": "die", "word": "Anrede", "plural": "", "pos": "noun", "examples": ["Schreiben Sie auch eine Anrede und einen Gruß."], "translation": "稱呼、開頭語", "emoji": "🖊️", "english": "salutation, form of address"}, {"article": "", "word": "anrufen", "plural": "", "pos": "verb", "examples": ["Kann man Sie anrufen?", "Peter ruft kurz seine Freundin an."], "translation": "打電話", "emoji": "📞", "english": "to call (phone)"}, {"article": "der", "word": "Anruf", "plural": "-e", "pos": "noun", "examples": ["Sie bekommt viele Anrufe auf ihrem Handy."], "translation": "電話", "emoji": "📞", "english": "phone call"}, {"article": "der", "word": "Anruf-beantworter", "plural": "", "pos": "noun", "examples": ["Wir sind im Moment nicht da. Sprechen Sie bitte auf", "den Anrufbeantworter."], "translation": "電話答錄機", "emoji": "📟", "english": "answering machine"}, {"article": "die", "word": "Ansage", "plural": "-n", "pos": "noun", "examples": ["Hören Sie die Ansagen."], "translation": "廣播", "emoji": "📢", "english": "announcement"}, {"article": "der", "word": "Anschluss", "plural": "", "pos": "noun", "examples": ["In Mannheim haben Sie Anschluss nach Saarbrücken.", "Ist das die Anmeldung für einen Telefonanschluss?"], "translation": "連接、轉乘", "emoji": "🔗", "english": "connection"}, {"article": "", "word": "an sein", "plural": "", "pos": "other", "examples": ["Heute Nacht war das Licht an."], "translation": "開著的", "emoji": "🔆", "english": "to be on"}, {"article": "", "word": "antworten", "plural": "", "pos": "verb", "examples": ["Er antwortet nicht."], "translation": "回答", "emoji": "💬", "english": "to answer"}, {"article": "die", "word": "Antwort", "plural": "-en", "pos": "noun", "examples": ["Er gibt leider keine Antwort."], "translation": "回答", "emoji": "💬", "english": "answer, reply"}, {"article": "die", "word": "Anzeige", "plural": "-n", "pos": "noun", "examples": ["Ich habe Ihre Anzeige in der Zeitung gelesen."], "translation": "廣告、通知", "emoji": "📰", "english": "advertisement, notice"}, {"article": "", "word": "anziehen", "plural": "", "pos": "verb", "reflexive": true, "examples": ["Ich muss mich noch anziehen."], "translation": "穿衣", "emoji": "👔", "english": "to get dressed, put on"}, {"article": "das", "word": "Apartment", "plural": "-s", "pos": "noun", "examples": ["Wir haben ein Apartment gemietet."], "translation": "公寓", "emoji": "🏢", "english": "apartment"}, {"article": "der", "word": "Apfel", "plural": "-Ä", "pos": "noun", "examples": ["Ein Pfund Äpfel bitte."], "translation": "蘋果", "emoji": "🍎", "english": "apple"}, {"article": "der", "word": "Appetit", "plural": "", "pos": "noun", "examples": ["Guten Appetit!"], "translation": "食慾", "emoji": "🍽️", "english": "appetite"}, {"article": "", "word": "arbeiten", "plural": "", "pos": "verb", "examples": ["Wo arbeiten Sie?"], "translation": "工作", "emoji": "💼", "english": "to work"}, {"article": "die", "word": "Arbeit", "plural": "-en", "pos": "noun", "examples": ["Mein Bruder sucht Arbeit."], "translation": "工作", "emoji": "💼", "english": "work, job"}, {"article": "", "word": "arbeitslos", "plural": "", "pos": "other", "examples": ["Es gibt bei uns viele Leute, die schon lange arbeitslos sind."], "translation": "失業的", "emoji": "😔", "english": "unemployed"}, {"article": "der", "word": "Arbeitsplatz", "plural": "-ä,", "pos": "noun", "examples": ["e An meinem Arbeitsplatz fehlt ein Drucker."], "translation": "工作場所", "emoji": "🏢", "english": "workplace"}, {"article": "der", "word": "Arm", "plural": "-e", "pos": "noun", "examples": ["Mein Arm tut weh."], "translation": "手臂", "emoji": "💪", "english": "arm"}, {"article": "der", "word": "Arzt, -Ä, e", "plural": "", "pos": "noun", "examples": ["Morgen habe ich einen Termin bei meiner Ärztin."], "translation": "醫生", "emoji": "👨‍⚕️", "english": "doctor"}, {"article": "", "word": "auch", "plural": "", "pos": "other", "examples": ["Ich bin auch Spanier."], "translation": "也、還", "emoji": "➕", "english": "also, too"}, {"article": "", "word": "auf", "plural": "", "pos": "other", "examples": ["Die Kinder spielen auf der Straße.", "Auf Wiedersehen.", "Wie heißt das auf Deutsch?"], "translation": "在…上、向上", "emoji": "⬆️", "english": "on, onto, open"}, {"article": "die", "word": "Aufgabe", "plural": "-n", "pos": "noun", "examples": ["Das ist eine schwere Aufgabe."], "translation": "任務、作業", "emoji": "📋", "english": "task, homework"}, {"article": "", "word": "aufhören", "plural": "", "pos": "verb", "examples": ["Der Kurs hört in einer Woche auf.", "Hier hört die Bahnhofstraße auf."], "translation": "停止", "emoji": "⛔", "english": "to stop, finish"}, {"article": "", "word": "auf sein", "plural": "", "pos": "other", "examples": ["Du brauchst den Schlüssel nicht. Die Wohnung ist auf."], "translation": "開著的（門）", "emoji": "🚪", "english": "to be open"}, {"article": "", "word": "aufstehen", "plural": "", "pos": "verb", "examples": ["Ich muss immer um vier Uhr aufstehen.", "Soll ich aufstehen?"], "translation": "起床", "emoji": "🌅", "english": "to get up, stand up"}, {"article": "der", "word": "Aufzug, -ü, e", "plural": "", "pos": "noun", "examples": ["In diesem Haus gibt es keinen Aufzug."], "translation": "電梯", "emoji": "🛗", "english": "elevator"}, {"article": "das", "word": "Auge", "plural": "-n", "pos": "noun", "examples": ["Er hat blaue Augen."], "translation": "眼睛", "emoji": "👁️", "english": "eye"}, {"article": "", "word": "aus", "plural": "", "pos": "other", "examples": ["Er kommt aus Brasilien."], "translation": "從…來、關", "emoji": "🚪", "english": "from, out of"}, {"article": "der", "word": "Ausflug", "plural": "", "pos": "noun", "examples": ["Morgen machen wir einen Ausflug nach Heidelberg."], "translation": "遠足、短途旅行", "emoji": "🌳", "english": "excursion, trip"}, {"article": "", "word": "ausfüllen", "plural": "", "pos": "verb", "examples": ["Füllen Sie bitte dieses Formular aus."], "translation": "填寫", "emoji": "📝", "english": "to fill in/out"}, {"article": "der", "word": "Ausgang", "plural": "", "pos": "noun", "examples": ["Wo ist der Ausgang?"], "translation": "出口", "emoji": "🚪", "english": "exit"}, {"article": "die", "word": "Auskunft, -ü, e", "plural": "", "pos": "noun", "examples": ["Können Sie mir eine Auskunft geben?"], "translation": "詢問台、資訊", "emoji": "ℹ️", "english": "information"}, {"article": "das", "word": "Ausland", "plural": "", "pos": "noun", "examples": ["Fahren Sie ins Ausland?"], "translation": "國外", "emoji": "✈️", "english": "abroad, foreign country"}, {"article": "der", "word": "Ausländer, -ausländisch", "plural": "", "pos": "noun", "examples": ["SInd Sie Ausländerin?", "Leider habe ich nur ausländisches Geld."], "translation": "外國人；外國的", "emoji": "🌍", "english": "foreigner"}, {"article": "", "word": "ausmachen", "plural": "", "pos": "verb", "examples": ["Mach bitte das Licht aus!"], "translation": "關掉（電器）", "emoji": "🔴", "english": "to turn off"}, {"article": "die", "word": "Aussage", "plural": "-n", "pos": "noun", "examples": ["Ist die Aussage richtig oder falsch?"], "translation": "陳述", "emoji": "💬", "english": "statement"}, {"article": "", "word": "aussehen", "plural": "", "pos": "verb", "examples": ["Das sieht schön aus."], "translation": "看起來", "emoji": "👀", "english": "to look, appear"}, {"article": "", "word": "aus sein", "plural": "", "pos": "other", "examples": ["Das Licht ist aus.", "Die Schule ist aus."], "translation": "關著的", "emoji": "⚫", "english": "to be off"}, {"article": "", "word": "aussteigen", "plural": "", "pos": "verb", "examples": ["Wo muss ich aussteigen?"], "translation": "下車", "emoji": "🚉", "english": "to get off (transport)"}, {"article": "der", "word": "Ausweis", "plural": "", "pos": "noun", "examples": ["Hier ist mein Ausweis."], "translation": "身份證", "emoji": "🪪", "english": "ID card"}, {"article": "", "word": "ausziehen", "plural": "", "pos": "verb", "reflexive": true, "examples": ["Zieh die Schuhe aus, bitte!"], "translation": "脫衣、搬出", "emoji": "👕", "english": "to take off (clothes), move out"}, {"article": "das", "word": "Auto", "plural": "-s", "pos": "noun", "examples": ["Er kommt mit dem Auto."], "translation": "汽車", "emoji": "🚗", "english": "car"}, {"article": "die", "word": "Autobahn", "plural": "-en", "pos": "noun", "examples": ["Wo geht‘s hier bitte zur Autobahn?"], "translation": "高速公路", "emoji": "🛣️", "english": "motorway, highway"}, {"article": "der", "word": "Automat", "plural": "", "pos": "noun", "examples": ["Die Fahrkarten gibt es nur am Automaten."], "translation": "自動售票機", "emoji": "🎰", "english": "vending machine, ticket machine"}, {"article": "", "word": "automatisch", "plural": "", "pos": "other", "examples": ["Du musst nichts machen. Das geht automatisch."], "translation": "自動地", "emoji": "⚙️", "english": "automatic"}, {"article": "das", "word": "Baby", "plural": "-s", "pos": "noun", "examples": ["Mein Kind ist noch ein Baby."], "translation": "嬰兒", "emoji": "👶", "english": "baby"}, {"article": "die", "word": "Bäckerei", "plural": "", "pos": "noun", "examples": ["Ich geh mal schnell zur Bäckerei."], "translation": "麵包店", "emoji": "🥖", "english": "bakery"}, {"article": "das", "word": "Bad", "plural": "", "pos": "noun", "examples": ["Wir haben kein großes Bad."], "translation": "浴室", "emoji": "🛁", "english": "bathroom, bath"}, {"article": "", "word": "baden", "plural": "", "pos": "verb", "examples": ["Ich bade nicht so gern, ich dusche lieber."], "translation": "洗澡", "emoji": "🛁", "english": "to bathe, swim"}, {"article": "die", "word": "Bahn", "plural": "", "pos": "noun", "examples": ["Wir fahren lieber mit der Bahn.", "Ich nehme die nächste Bahn."], "translation": "火車、鐵路", "emoji": "🚂", "english": "train, railway"}, {"article": "der", "word": "Bahnhof", "plural": "", "pos": "noun", "examples": ["Komme ich hier zum Bahnhof?"], "translation": "火車站", "emoji": "🚉", "english": "train station"}, {"article": "der", "word": "Bahnsteig", "plural": "", "pos": "noun", "examples": ["Auf welchem Bahnsteig fährt der Zug?"], "translation": "月台", "emoji": "🚉", "english": "platform"}, {"article": "", "word": "bald", "plural": "", "pos": "other", "examples": ["Ich komme bald."], "translation": "很快", "emoji": "⏰", "english": "soon"}, {"article": "der", "word": "Balkon", "plural": "", "pos": "noun", "examples": ["Die Wohnung hat auch einen kleinen Balkon."], "translation": "陽台", "emoji": "🏗️", "english": "balcony"}, {"article": "die", "word": "Banane", "plural": "-n", "pos": "noun", "examples": ["Drei Bananen, bitte!"], "translation": "香蕉", "emoji": "🍌", "english": "banana"}, {"article": "die", "word": "Bank", "plural": "", "pos": "noun", "examples": ["Die Bank schließt schon um vier Uhr.", "Er sitzt im Park auf einer Bank und liest."], "translation": "銀行、長椅", "emoji": "🏦", "english": "bank; bench"}, {"article": "", "word": "bar", "plural": "", "pos": "other", "examples": ["Muss ich bar zahlen oder geht‘s auch mit Karte?"], "translation": "現金付款", "emoji": "💵", "english": "cash (payment)"}, {"article": "der", "word": "Bauch", "plural": "", "pos": "noun", "examples": ["Seit gestern tut mir der Bauch weh."], "translation": "肚子", "emoji": "🫃", "english": "stomach, belly"}, {"article": "der", "word": "Baum, -ä, e", "plural": "", "pos": "noun", "examples": ["Vorsicht, fahr nicht an den Baum!"], "translation": "樹", "emoji": "🌳", "english": "tree"}, {"article": "der", "word": "Beamte", "plural": "-n", "pos": "noun", "examples": ["Fragen Sie die Beamtin an Schalter acht!"], "translation": "公務員", "emoji": "👨‍💼", "english": "official, civil servant"}, {"article": "", "word": "bedeuten", "plural": "", "pos": "verb", "examples": ["Was bedeutet das Wort?"], "translation": "意思是", "emoji": "💡", "english": "to mean"}, {"article": "", "word": "beginnen", "plural": "", "pos": "verb", "examples": ["Das Spiel beginnt um 15.30 Uhr."], "translation": "開始", "emoji": "▶️", "english": "to begin"}, {"article": "", "word": "bei", "plural": "", "pos": "other", "examples": ["Offenbach liegt bei Frankfurt.", "Ich wohne bei meinen Eltern.", "Bei uns regnet es heute.", "Er arbeitet bei der Polizei."], "translation": "在…旁邊、在…那裡", "emoji": "📍", "english": "at, near, with"}, {"article": "", "word": "beide", "plural": "", "pos": "other", "examples": ["Beide Eltern arbeiten.", "Wir kommen beide."], "translation": "兩個都", "emoji": "👥", "english": "both"}, {"article": "das", "word": "Bein", "plural": "-e", "pos": "noun", "examples": ["Mein rechtes Bein tut weh."], "translation": "腿", "emoji": "🦵", "english": "leg"}, {"article": "das", "word": "Beispiel", "plural": "-e", "pos": "noun", "examples": ["Kannst du mir ein Beispiel sagen?"], "translation": "例子", "emoji": "📖", "english": "example"}, {"article": "", "word": "zum Beispiel/z. B.", "plural": "", "pos": "other", "examples": ["Viele meiner Verwandten, z. B. meine beiden Brüder, arbeiten auch hier."], "translation": "例如", "emoji": "📖", "english": "for example (e.g.)"}, {"article": "", "word": "bekannt", "plural": "", "pos": "other", "examples": ["Picasso ist sehr bekannt."], "translation": "有名的、認識的", "emoji": "⭐", "english": "well-known, familiar"}, {"article": "", "word": "der/die Bekannte, -n", "plural": "", "pos": "other", "examples": ["Ein Bekannter von mir heißt Klaus."], "translation": "熟人", "emoji": "🤝", "english": "acquaintance"}, {"article": "", "word": "bekommen", "plural": "", "pos": "verb", "examples": ["Haben Sie meinen Brief bekommen?", "Was bekommen Sie?", "Dieses Medikament bekommen Sie in der Apotheke."], "translation": "得到、收到", "emoji": "🎁", "english": "to get, receive"}, {"article": "", "word": "benutzen", "plural": "", "pos": "verb", "examples": ["Die Aufzüge bitte nicht benutzen!"], "translation": "使用", "emoji": "🔧", "english": "to use"}, {"article": "der", "word": "Beruf", "plural": "-e", "pos": "noun", "examples": ["Was sind Sie von Beruf?", "Was ist Ihr Beruf?"], "translation": "職業", "emoji": "💼", "english": "profession, job"}, {"article": "", "word": "besetzt", "plural": "", "pos": "other", "examples": ["Die Nummer ist immer besetzt.", "Der Platz ist besetzt."], "translation": "佔用的、忙線", "emoji": "🚫", "english": "occupied, busy"}, {"article": "", "word": "besichtigen", "plural": "", "pos": "verb", "examples": ["Ich möchte gern den Dom besichtigen."], "translation": "參觀", "emoji": "🗺️", "english": "to visit, view"}, {"article": "", "word": "besser", "plural": "", "pos": "other", "examples": ["Es geht mir schon besser."], "translation": "更好的", "emoji": "⬆️", "english": "better"}, {"article": "", "word": "best", "plural": "", "pos": "other", "examples": ["Am besten treffen wir uns morgen."], "translation": "最好的", "emoji": "🥇", "english": "best"}, {"article": "", "word": "bestellen", "plural": "", "pos": "verb", "examples": ["Wir möchten bestellen, bitte.", "Dieses Buch haben wir nicht – sollen wir es für Sie bestellen?"], "translation": "訂購、點餐", "emoji": "📋", "english": "to order"}, {"article": "", "word": "besuchen", "plural": "", "pos": "verb", "examples": ["Darf ich dich besuchen?"], "translation": "拜訪", "emoji": "🤝", "english": "to visit"}, {"article": "das", "word": "Bett", "plural": "-en", "pos": "noun", "examples": ["Wir brauchen noch ein Kinderbett."], "translation": "床", "emoji": "🛏️", "english": "bed"}, {"article": "", "word": "bezahlen", "plural": "", "pos": "verb", "examples": ["Wo muss ich bezahlen?"], "translation": "付款", "emoji": "💳", "english": "to pay"}, {"article": "das", "word": "Bier", "plural": "", "pos": "noun", "examples": ["Noch ein Bier bitte."], "translation": "啤酒", "emoji": "🍺", "english": "beer"}, {"article": "das", "word": "Bild", "plural": "-er", "pos": "noun", "examples": ["Hast du ein Bild von deinem Sohn?"], "translation": "圖片、照片", "emoji": "🖼️", "english": "picture, image"}, {"article": "", "word": "billig", "plural": "", "pos": "other", "examples": ["Die Jacke kostet nur 10 Euro! Die ist aber billig!"], "translation": "便宜", "emoji": "💰", "english": "cheap"}, {"article": "die", "word": "Birne", "plural": "-n", "pos": "noun", "examples": ["Ein Kilo Birnen, bitte!"], "translation": "梨子", "emoji": "🍐", "english": "pear"}, {"article": "", "word": "bis", "plural": "", "pos": "other", "examples": ["Ich fahre nur bis Stuttgart.", "Ich warte bis morgen."], "translation": "到、直到", "emoji": "⏳", "english": "until, to"}, {"article": "", "word": "bisschen", "plural": "", "pos": "verb", "examples": ["Ich spreche Englisch, Französisch und ein bisschen Deutsch."], "translation": "一點點", "emoji": "🤏", "english": "a little, a bit"}, {"article": "", "word": "bitte", "plural": "", "pos": "other", "examples": ["Eine Tasse Kaffee, bitte!", "Sprechen Sie bitte leise!"], "translation": "請、不客氣", "emoji": "🙏", "english": "please; you're welcome"}, {"article": "die", "word": "Bitte", "plural": "-n", "pos": "noun", "examples": ["Ich habe noch eine Bitte."], "translation": "請、不客氣", "emoji": "🙏", "english": "please; you're welcome"}, {"article": "", "word": "bitten", "plural": "", "pos": "verb", "examples": ["Darf ich Sie um etwas bitten?"], "translation": "請求", "emoji": "🙏", "english": "to ask, request"}, {"article": "", "word": "bitter", "plural": "", "pos": "other", "examples": ["Der Kaffee schmeckt bitter."], "translation": "苦的", "emoji": "😣", "english": "bitter"}, {"article": "", "word": "bleiben", "plural": "", "pos": "verb", "examples": ["Ich bleibe heute zu Hause.", "Wir bleiben nur bis morgen."], "translation": "留下、待", "emoji": "🏠", "english": "to stay, remain"}, {"article": "der", "word": "Bleistift", "plural": "-e", "pos": "noun", "examples": ["Hast du einen Bleistift?"], "translation": "鉛筆", "emoji": "✏️", "english": "pencil"}, {"article": "der", "word": "Blick", "plural": "", "pos": "noun", "examples": ["Von diesem Hotel hat man einen guten Blick auf den Rhein."], "translation": "視野、眺望", "emoji": "👀", "english": "view, glance"}, {"article": "die", "word": "Blume", "plural": "-n", "pos": "noun", "examples": ["Gefallen dir die Blumen?"], "translation": "花", "emoji": "🌸", "english": "flower"}, {"article": "der", "word": "Bogen", "plural": "", "pos": "noun", "examples": ["Schreiben Sie Ihre Lösungen bitte auf den Antwortbogen."], "translation": "表格、弧", "emoji": "📄", "english": "form, sheet"}, {"article": "", "word": "böse", "plural": "", "pos": "other", "examples": ["Sie ist böse auf mich."], "translation": "生氣的、壞的", "emoji": "😡", "english": "angry, bad"}, {"article": "", "word": "brauchen", "plural": "", "pos": "verb", "examples": ["Brauchst du die Zeitung noch?"], "translation": "需要", "emoji": "❗", "english": "to need"}, {"article": "", "word": "breit", "plural": "", "pos": "other", "examples": ["Wie breit ist der Schrank?"], "translation": "寬的", "emoji": "↔️", "english": "wide, broad"}, {"article": "der", "word": "Brief", "plural": "-e", "pos": "noun", "examples": ["Haben Sie einen Brief für mich?"], "translation": "信", "emoji": "✉️", "english": "letter"}, {"article": "die", "word": "Briefmarke", "plural": "-n", "pos": "noun", "examples": ["Kaufst du bitte Briefmarken bei der Post."], "translation": "郵票", "emoji": "📮", "english": "stamp"}, {"article": "", "word": "bringen", "plural": "", "pos": "verb", "examples": ["Bringen Sie mir bitte noch einen Kaffee!", "Wir müssen ihn zum Arzt bringen."], "translation": "帶來", "emoji": "🚚", "english": "to bring"}, {"article": "das", "word": "Brot", "plural": "-e", "pos": "noun", "examples": ["Haben Sie auch Weißbrot?", "Nimm noch ein paar Brote für die Fahrt mit."], "translation": "麵包", "emoji": "🍞", "english": "bread"}, {"article": "das", "word": "Brötchen, –", "plural": "", "pos": "noun", "examples": ["Möchtest du Brötchen zum Frühstück?"], "translation": "小麵包", "emoji": "🥐", "english": "bread roll"}, {"article": "der", "word": "Bruder", "plural": "-ü", "pos": "noun", "examples": ["Sein Bruder arbeitet auch hier."], "translation": "兄弟", "emoji": "👦", "english": "brother"}, {"article": "das", "word": "Buch, -ü, er", "plural": "", "pos": "noun", "examples": ["Gute Bücher sind oft sehr teuer.", "In diesem Wörterbuch finden Sie mehr als 20.000 Wörter."], "translation": "書", "emoji": "📚", "english": "book"}, {"article": "der", "word": "Buchstabe", "plural": "-n", "pos": "noun", "examples": ["Diesen Buchstaben gibt es in meiner Sprache nicht."], "translation": "字母", "emoji": "🔤", "english": "letter (alphabet)"}, {"article": "", "word": "buchstabieren", "plural": "", "pos": "verb", "examples": ["Bitte buchstabieren Sie Ihren Namen."], "translation": "拼寫", "emoji": "🔤", "english": "to spell"}, {"article": "der", "word": "Bus", "plural": "-se", "pos": "noun", "examples": ["Wann kommt der nächste Bus?"], "translation": "公車", "emoji": "🚌", "english": "bus"}, {"article": "die", "word": "Butter", "plural": "", "pos": "noun", "examples": ["Für mich bitte ein Brötchen mit Butter und Käse."], "translation": "奶油", "emoji": "🧈", "english": "butter"}, {"article": "das", "word": "Café", "plural": "-s", "pos": "noun", "examples": ["Sollen wir uns im Café treffen?"], "translation": "咖啡館", "emoji": "☕", "english": "café, coffee shop"}, {"article": "die", "word": "CD", "plural": "-s", "pos": "noun", "examples": ["Bring bitte deine Lieblings-CD mit."], "translation": "光碟", "emoji": "💿", "english": "CD"}, {"article": "der", "word": "Chef", "plural": "", "pos": "noun", "examples": ["Wir haben eine neue Chefin."], "translation": "老闆", "emoji": "👨‍💼", "english": "boss, manager"}, {"article": "", "word": "circa/ca.", "plural": "", "pos": "other", "examples": ["Von Mainz nach Frankfurt sind es circa fünfzig Kilometer."], "translation": "大約", "emoji": "≈", "english": "approximately, about"}, {"article": "der", "word": "Computer, –", "plural": "", "pos": "noun", "examples": ["Wann bekommst du deinen neuen Computer?"], "translation": "電腦", "emoji": "💻", "english": "computer"}, {"article": "", "word": "da", "plural": "", "pos": "other", "examples": ["Da hinten ist er ja.", "Wir sprechen gerade über Paul. Da kommt er ja gerade.", "Ich nehme das da.", "Ist Herr Klein schon da?"], "translation": "在那裡、那時", "emoji": "📍", "english": "there, then"}, {"article": "die", "word": "Dame", "plural": "-n", "pos": "noun", "examples": ["Damen (an der Toilette) Sehr geehrte Damen und Herren!"], "translation": "女士", "emoji": "👩", "english": "lady, woman"}, {"article": "", "word": "daneben", "plural": "", "pos": "verb", "examples": ["Du kennst doch die Post. Daneben ist die Bank."], "translation": "在旁邊", "emoji": "↔️", "english": "next to it"}, {"article": "", "word": "danken", "plural": "", "pos": "verb", "examples": ["Ich danke Ihnen für die Einladung."], "translation": "感謝", "emoji": "🙏", "english": "to thank"}, {"article": "der", "word": "Dank", "plural": "", "pos": "noun", "examples": ["Vielen Dank!", "Herzlichen Dank!"], "translation": "謝意、感謝", "emoji": "🙏", "english": "thanks, gratitude"}, {"article": "", "word": "danke", "plural": "", "pos": "other", "examples": ["Soll ich Ihnen helfen? - Nein, danke!"], "translation": "謝謝", "emoji": "🙏", "english": "thank you"}, {"article": "", "word": "dann", "plural": "", "pos": "other", "examples": ["Ich muss noch schnell zur Post, dann komme ich."], "translation": "然後", "emoji": "➡️", "english": "then"}, {"article": "das", "word": "Datum", "plural": "", "pos": "noun", "examples": ["Bitte schreiben Sie noch das Datum auf das Formular."], "translation": "日期", "emoji": "📅", "english": "date"}, {"article": "", "word": "dauern", "plural": "", "pos": "verb", "examples": ["Wie lange dauert der Film?"], "translation": "持續", "emoji": "⏱️", "english": "to last, take (time)"}, {"article": "", "word": "dein", "plural": "", "pos": "other", "examples": ["Ist das dein Auto?", "Ist das deins?"], "translation": "你的", "emoji": "👤", "english": "your (informal)"}, {"article": "", "word": "denn", "plural": "", "pos": "other", "examples": ["Ich kann nicht kommen, denn ich bin krank."], "translation": "因為", "emoji": "💭", "english": "because; then"}, {"article": "", "word": "der, die, das", "plural": "", "pos": "other", "examples": ["Ich nehme das da.", "Hier ist der Brief, den du suchst.", "Die Fahrkarte bekommst du am Bahnhof."], "translation": "定冠詞", "emoji": "📖", "english": "the (definite article)"}, {"article": "", "word": "dich", "plural": "", "pos": "other", "examples": ["Die Blumen sind für dich."], "translation": "你（賓格）", "emoji": "👤", "english": "you (accusative)"}, {"article": "", "word": "dies", "plural": "", "pos": "other", "examples": ["Ich nehme lieber diesen Kuchen."], "translation": "這個", "emoji": "👉", "english": "this"}, {"article": "", "word": "dir", "plural": "", "pos": "other", "examples": ["Gefallen dir die Blumen?"], "translation": "你（與格）", "emoji": "👤", "english": "you (dative)"}, {"article": "die", "word": "Disco", "plural": "", "pos": "noun", "examples": ["Heute abend gehen wir in die Disco tanzen."], "translation": "迪斯可", "emoji": "🎵", "english": "disco, nightclub"}, {"article": "der", "word": "Doktor", "plural": "", "pos": "noun", "examples": ["Meine Tochter ist krank. Wir gehen zum Doktor."], "translation": "博士、醫生", "emoji": "👨‍⚕️", "english": "doctor, PhD"}, {"article": "das", "word": "Doppelzimmer", "plural": "", "pos": "noun", "examples": ["Wollen Sie ein Doppelzimmer oder ein Einzelzimmer?"], "translation": "雙人房", "emoji": "🛏️", "english": "double room"}, {"article": "das", "word": "Dorf, -ö, er", "plural": "", "pos": "noun", "examples": ["Meine Familie lebt in einem Dorf."], "translation": "村莊", "emoji": "🏘️", "english": "village"}, {"article": "", "word": "dort, -her, -hin", "plural": "", "pos": "other", "examples": ["Deine Tasche kannst du dorthin stellen.", "Dort ist unser Haus."], "translation": "那裡", "emoji": "📍", "english": "there"}, {"article": "", "word": "draußen", "plural": "", "pos": "verb", "examples": ["Wollen wir draußen sitzen?"], "translation": "在外面", "emoji": "🌳", "english": "outside"}, {"article": "", "word": "drucken", "plural": "", "pos": "verb", "examples": ["Bitte drucke das Formular für mich."], "translation": "列印", "emoji": "🖨️", "english": "to print"}, {"article": "der", "word": "Drucker, –", "plural": "", "pos": "noun", "examples": ["Mein Drucker ist kaputt."], "translation": "印表機", "emoji": "🖨️", "english": "printer"}, {"article": "", "word": "drücken", "plural": "", "pos": "verb", "examples": ["Drück hier, dann geht der Computer an."], "translation": "按下", "emoji": "👆", "english": "to press, push"}, {"article": "", "word": "durch", "plural": "", "pos": "other", "examples": ["Am besten gehen Sie durch die Breite Straße."], "translation": "穿過", "emoji": "🚶", "english": "through"}, {"article": "die", "word": "Durchsage", "plural": "-n", "pos": "noun", "examples": ["Ich habe die Durchsage nicht verstanden."], "translation": "廣播", "emoji": "📢", "english": "announcement (PA)"}, {"article": "", "word": "dürfen", "plural": "", "pos": "verb", "examples": ["Sie dürfen hier nicht rauchen.", "Darf ich Sie zu einem Kaffee einladen?", "Es darf nicht mehr als 15 Euro kosten."], "translation": "可以、被允許", "emoji": "✅", "english": "may, to be allowed"}, {"article": "der", "word": "Durst", "plural": "", "pos": "noun", "examples": ["Hast du etwas zu trinken? Ich habe großen Durst."], "translation": "口渴", "emoji": "💧", "english": "thirst"}, {"article": "", "word": "duschen", "plural": "", "pos": "verb", "reflexive": true, "examples": ["Ich bade nicht so gern, ich dusche lieber."], "translation": "淋浴", "emoji": "🚿", "english": "to shower"}, {"article": "die", "word": "Dusche", "plural": "", "pos": "noun", "examples": ["Unsere Wohnung hat nur eine Dusche."], "translation": "淋浴間", "emoji": "🚿", "english": "shower"}, {"article": "die", "word": "Ecke", "plural": "-n", "pos": "noun", "examples": ["An der nächsten Ecke links."], "translation": "角落", "emoji": "📐", "english": "corner"}, {"article": "die", "word": "Ehefrau", "plural": "-en/", "pos": "noun", "examples": [], "translation": "妻子", "emoji": "👩", "english": "wife"}, {"article": "der", "word": "Ehemann", "plural": "ä, er", "pos": "noun", "examples": ["Das ist mein (Ehe-) Mann/meine (Ehe-) Frau."], "translation": "丈夫", "emoji": "👨", "english": "husband"}, {"article": "das", "word": "Ei", "plural": "-er", "pos": "noun", "examples": ["Möchtest du ein Ei zum Frühstück?"], "translation": "蛋", "emoji": "🥚", "english": "egg"}, {"article": "", "word": "eilig", "plural": "", "pos": "other", "examples": ["Hast du es eilig?"], "translation": "匆忙的", "emoji": "⏩", "english": "urgent, in a hurry"}, {"article": "", "word": "ein", "plural": "", "pos": "other", "examples": ["Ich nehme ein Bier. Willst du auch eins?", "Ist hier einer, der das kann?"], "translation": "一個", "emoji": "1️⃣", "english": "a, one"}, {"article": "", "word": "einfach", "plural": "", "pos": "other", "examples": ["Die Prüfung ist ganz einfach.", "Hin und zurück? – Nein, bitte nur einfach.", "Ich brauche nur ein einfaches Zimmer."], "translation": "簡單的", "emoji": "⭐", "english": "simple; one-way"}, {"article": "der", "word": "Eingang", "plural": "", "pos": "noun", "examples": ["Der Eingang ist um die Ecke."], "translation": "入口", "emoji": "🚪", "english": "entrance"}, {"article": "", "word": "einkaufen", "plural": "", "pos": "verb", "examples": ["Ich muss noch für morgen einkaufen."], "translation": "購物", "emoji": "🛒", "english": "to shop"}, {"article": "", "word": "einladen", "plural": "", "pos": "verb", "examples": ["Darf ich Sie zu einem Kaffee einladen?"], "translation": "邀請", "emoji": "💌", "english": "to invite"}, {"article": "die", "word": "Einladung", "plural": "", "pos": "noun", "examples": ["Danke für die Einladung!"], "translation": "邀請", "emoji": "💌", "english": "invitation"}, {"article": "", "word": "einmal", "plural": "", "pos": "other", "examples": ["Diese Prüfung mache ich nicht noch einmal."], "translation": "一次", "emoji": "1️⃣", "english": "once"}, {"article": "", "word": "einsteigen", "plural": "", "pos": "verb", "examples": ["Schnell, steig ein, der Zug fährt gleich."], "translation": "上車", "emoji": "🚉", "english": "to get on (transport)"}, {"article": "der", "word": "Eintritt", "plural": "", "pos": "noun", "examples": ["Der Preis für den Eintritt ist 5 Euro."], "translation": "入場費", "emoji": "🎟️", "english": "admission, entry fee"}, {"article": "das", "word": "Einzelzimmer", "plural": "", "pos": "noun", "examples": ["Haben Sie noch ein Einzelzimmer?"], "translation": "單人房", "emoji": "🛏️", "english": "single room"}, {"article": "die", "word": "Eltern (pl.)", "plural": "", "pos": "noun", "examples": ["Meine Eltern leben in Spanien."], "translation": "父母", "emoji": "👨‍👩‍👧", "english": "parents"}, {"article": "die", "word": "E-Mail", "plural": "-s", "pos": "noun", "examples": ["Ich habe Ihre E-Mail nicht bekommen."], "translation": "電子郵件", "emoji": "📧", "english": "email"}, {"article": "der", "word": "Empfänger, –", "plural": "", "pos": "noun", "examples": ["Auf dem Brief steht dein Name, also bist du der Empfänger."], "translation": "收件人", "emoji": "📬", "english": "recipient"}, {"article": "", "word": "empfehlen", "plural": "", "pos": "verb", "examples": ["Welchen Wein können Sie mir empfehlen?"], "translation": "推薦", "emoji": "⭐", "english": "to recommend"}, {"article": "", "word": "enden", "plural": "", "pos": "verb", "examples": ["Die Straße endet hier."], "translation": "結束", "emoji": "🏁", "english": "to end"}, {"article": "das", "word": "Ende", "plural": "", "pos": "noun", "examples": ["Sie wohnt am Ende der Straße.", "Er bekommt sein Geld am Ende des Monats."], "translation": "結束、末端", "emoji": "🏁", "english": "end"}, {"article": "", "word": "entschuldigen", "plural": "", "pos": "verb", "examples": ["Entschuldigen Sie bitte!"], "translation": "原諒、請問", "emoji": "🙏", "english": "to excuse"}, {"article": "die", "word": "Entschuldigung", "plural": "", "pos": "noun", "examples": ["Entschuldigung! – Bitte."], "translation": "對不起", "emoji": "🙏", "english": "excuse me, sorry"}, {"article": "", "word": "er", "plural": "", "pos": "other", "examples": ["Er heißt Ali."], "translation": "他", "emoji": "👨", "english": "he"}, {"article": "das", "word": "Ergebnis", "plural": "-se", "pos": "noun", "examples": ["Das Ergebnis des Tests bekommen Sie in zwei Wochen."], "translation": "結果", "emoji": "📊", "english": "result"}, {"article": "", "word": "erklären", "plural": "", "pos": "verb", "examples": ["Kannst du mir das erklären?"], "translation": "解釋", "emoji": "💡", "english": "to explain"}, {"article": "", "word": "erlauben", "plural": "", "pos": "verb", "examples": ["Rauchen ist hier nicht erlaubt."], "translation": "允許", "emoji": "✅", "english": "to allow, permit"}, {"article": "der", "word": "Erwachsene", "plural": "-n", "pos": "noun", "examples": ["Dieser Film ist nur für Erwachsene."], "translation": "成人", "emoji": "👨", "english": "adult"}, {"article": "", "word": "erzählen", "plural": "", "pos": "verb", "examples": ["Wir müssen euch etwas erzählen!"], "translation": "講述", "emoji": "💬", "english": "to tell, narrate"}, {"article": "", "word": "es", "plural": "", "pos": "other", "examples": ["Es regnet."], "translation": "它", "emoji": "❓", "english": "it"}, {"article": "", "word": "essen", "plural": "", "pos": "verb", "examples": ["Was gibt es zu essen?"], "translation": "吃", "emoji": "🍴", "english": "to eat; food"}, {"article": "das", "word": "Essen", "plural": "", "pos": "noun", "examples": ["Das Essen ist heute sehr gut."], "translation": "吃", "emoji": "🍴", "english": "to eat; food"}, {"article": "", "word": "euer", "plural": "", "pos": "other", "examples": ["Euer Kurs beginnt heute."], "translation": "你們的", "emoji": "👥", "english": "your (plural)"}, {"article": "", "word": "fahren", "plural": "", "pos": "verb", "examples": ["Ich fahre mit dem Auto zur Arbeit."], "translation": "騎/開車", "emoji": "🚗", "english": "to drive, travel"}, {"article": "der", "word": "Fahrer", "plural": "", "pos": "noun", "examples": ["Bitte nicht mit dem Fahrer sprechen!"], "translation": "司機", "emoji": "🧑‍✈️", "english": "driver"}, {"article": "die", "word": "Fahrkarte", "plural": "-n", "pos": "noun", "examples": ["Hast du schon eine Fahrkarte?"], "translation": "車票", "emoji": "🎫", "english": "ticket"}, {"article": "das", "word": "Fahrrad, -ä, er", "plural": "", "pos": "noun", "examples": ["Fährst du mit dem Fahrrad oder mit dem Auto?"], "translation": "自行車", "emoji": "🚲", "english": "bicycle"}, {"article": "", "word": "falsch", "plural": "", "pos": "other", "examples": ["Das ist falsch."], "translation": "錯誤的", "emoji": "❌", "english": "wrong, false"}, {"article": "die", "word": "Familie", "plural": "-n", "pos": "noun", "examples": ["Meine Familie lebt in Spanien."], "translation": "家庭", "emoji": "👨‍👩‍👧", "english": "family"}, {"article": "der", "word": "Familienname", "plural": "", "pos": "noun", "examples": ["Meine Familiennamen sind García González."], "translation": "姓氏", "emoji": "📛", "english": "surname, last name"}, {"article": "der", "word": "Familienstand", "plural": "", "pos": "noun", "examples": ["Bei „Familienstand“ musst du „ledig“ ankreuzen."], "translation": "婚姻狀況", "emoji": "💑", "english": "marital status"}, {"article": "die", "word": "Farbe", "plural": "-n", "pos": "noun", "examples": ["Die Farbe gefällt mir gut."], "translation": "顏色", "emoji": "🎨", "english": "color"}, {"article": "das", "word": "Fax", "plural": "-e", "pos": "noun", "examples": ["Schicken Sie uns einfach ein Fax!"], "translation": "傳真", "emoji": "📠", "english": "fax"}, {"article": "", "word": "Feier", "plural": "", "pos": "exclamation", "examples": ["z. B. Feierabend, Feiertag Am Montag ist Feiertag."], "translation": "慶典、節日", "emoji": "🎉", "english": "celebration, holiday"}, {"article": "", "word": "feiern", "plural": "", "pos": "verb", "examples": ["Wir feiern heute meinen Geburtstag."], "translation": "慶祝", "emoji": "🎉", "english": "to celebrate"}, {"article": "", "word": "fehlen", "plural": "", "pos": "verb", "examples": ["Herr Müller ist nicht da, er fehlt schon seit drei Tagen.", "Was fehlt Ihnen?"], "translation": "缺席、欠缺", "emoji": "❓", "english": "to be missing, absent"}, {"article": "der", "word": "Fehler, –", "plural": "", "pos": "noun", "examples": ["Diesen Fehler mache ich immer."], "translation": "錯誤", "emoji": "❌", "english": "mistake"}, {"article": "", "word": "fernsehen", "plural": "", "pos": "verb", "examples": ["Wollen wir heute Abend mal fernsehen?"], "translation": "看電視", "emoji": "📺", "english": "to watch TV"}, {"article": "", "word": "fertig", "plural": "", "pos": "other", "examples": ["Bist du fertig?", "Ist mein Auto schon fertig?"], "translation": "完成的、準備好的", "emoji": "✅", "english": "ready, finished"}, {"article": "das", "word": "Feuer", "plural": "", "pos": "noun", "examples": ["Haben Sie Feuer?"], "translation": "火", "emoji": "🔥", "english": "fire"}, {"article": "das", "word": "Fieber", "plural": "", "pos": "noun", "examples": ["Mein Mann hat noch immer Fieber."], "translation": "發燒", "emoji": "🤒", "english": "fever"}, {"article": "der", "word": "Film", "plural": "-e", "pos": "noun", "examples": ["Ich möchte gern diesen Film sehen."], "translation": "電影、影片", "emoji": "🎬", "english": "film, movie"}, {"article": "", "word": "finden", "plural": "", "pos": "verb", "examples": ["Wir müssen den Schlüssel finden."], "translation": "找到", "emoji": "✅", "english": "to find"}, {"article": "die", "word": "Firma", "plural": "", "pos": "noun", "examples": ["Er arbeitet jetzt bei einer anderen Firma."], "translation": "公司", "emoji": "🏢", "english": "company, firm"}, {"article": "der", "word": "Fisch", "plural": "-e", "pos": "noun", "examples": ["Ich esse gern Fisch. Fleisch mag ich nicht."], "translation": "魚", "emoji": "🐟", "english": "fish"}, {"article": "die", "word": "Flasche", "plural": "-n", "pos": "noun", "examples": ["Eine Flasche Bier, bitte."], "translation": "瓶子", "emoji": "🍾", "english": "bottle"}, {"article": "das", "word": "Fleisch", "plural": "", "pos": "noun", "examples": ["Fleisch mag ich nicht."], "translation": "肉", "emoji": "🥩", "english": "meat"}, {"article": "", "word": "fliegen", "plural": "", "pos": "verb", "examples": ["Ich fliege nicht gern. Deshalb fahre ich mit dem Zug."], "translation": "飛", "emoji": "✈️", "english": "to fly"}, {"article": "", "word": "abfliegen", "plural": "", "pos": "verb", "examples": ["Wann fliegst du ab?"], "translation": "起飛", "emoji": "✈️", "english": "to take off"}, {"article": "der", "word": "Abflug", "plural": "", "pos": "noun", "examples": ["Der Abflug ist um 11.20 Uhr."], "translation": "起飛", "emoji": "✈️", "english": "departure (flight)"}, {"article": "der", "word": "Flughafen", "plural": "", "pos": "noun", "examples": ["Kannst du mich zum Flughafen bringen?"], "translation": "機場", "emoji": "✈️", "english": "airport"}, {"article": "das", "word": "Flugzeug", "plural": "", "pos": "noun", "examples": ["Das Flugzeug aus Berlin kommt heute später an."], "translation": "飛機", "emoji": "✈️", "english": "airplane"}, {"article": "das", "word": "Formular", "plural": "-e", "pos": "noun", "examples": ["Sie müssen dieses Formular ausfüllen."], "translation": "表格", "emoji": "📄", "english": "form"}, {"article": "das", "word": "Foto", "plural": "-s", "pos": "noun", "examples": ["Darf ich ein Foto machen?"], "translation": "照片", "emoji": "📷", "english": "photo"}, {"article": "", "word": "fragen", "plural": "", "pos": "verb", "examples": ["Er möchte Sie etwas fragen. Wann kommen Sie?"], "translation": "問", "emoji": "❓", "english": "to ask"}, {"article": "die", "word": "Frage", "plural": "-n", "pos": "noun", "examples": ["Ich habe eine Frage."], "translation": "問題", "emoji": "❓", "english": "question"}, {"article": "die", "word": "Frau", "plural": "-en", "pos": "noun", "examples": ["Das ist Frau Becker.", "Guten Tag, Frau Schmitt!", "Hier arbeiten mehr Frauen als Männer."], "translation": "女人", "emoji": "👩", "english": "woman, Mrs, wife"}, {"article": "", "word": "frei", "plural": "", "pos": "other", "examples": ["Ist der Platz noch frei?"], "translation": "空閒的、自由的", "emoji": "🆓", "english": "free, available"}, {"article": "die", "word": "Freizeit", "plural": "", "pos": "noun", "examples": ["In meiner Freizeit spiele ich oft Fußball."], "translation": "休閒時間", "emoji": "⏰", "english": "free time, leisure"}, {"article": "", "word": "fremd", "plural": "", "pos": "other", "examples": ["Das weiß ich nicht; ich bin fremd hier."], "translation": "陌生的", "emoji": "🤷", "english": "foreign, strange"}, {"article": "", "word": "freuen", "plural": "", "pos": "verb", "reflexive": true, "examples": ["Ich freue mich auf den Urlaub."], "translation": "高興", "emoji": "😊", "english": "to be happy, look forward"}, {"article": "der", "word": "Freund", "plural": "-e", "pos": "noun", "examples": ["Das ist ein Freund von mir.", "Das ist meine Freundin."], "translation": "朋友", "emoji": "👫", "english": "friend; boyfriend"}, {"article": "", "word": "früher", "plural": "", "pos": "other", "examples": ["Früher waren wir oft zusammen im Kino."], "translation": "以前", "emoji": "⏮️", "english": "before, in the past"}, {"article": "", "word": "frühstücken", "plural": "", "pos": "verb", "examples": ["Am Sonntag frühstücke ich gern im Bett."], "translation": "吃早餐", "emoji": "🍳", "english": "to have breakfast"}, {"article": "das", "word": "Frühstück", "plural": "", "pos": "noun", "examples": ["Möchtest du ein Ei zum Frühstück?"], "translation": "早餐", "emoji": "🍳", "english": "breakfast"}, {"article": "die", "word": "Führung", "plural": "", "pos": "noun", "examples": ["Die Führung durch das Haus beginnt in 3 Minuten."], "translation": "導覽", "emoji": "🗺️", "english": "guided tour"}, {"article": "", "word": "für", "plural": "", "pos": "other", "examples": ["Das ist für Sie.", "Das ist der Schlüssel für die Haustür.", "Das ist das Brot für morgen."], "translation": "為了", "emoji": "❤️", "english": "for"}, {"article": "der", "word": "Fuß, -ü, e", "plural": "", "pos": "noun", "examples": ["Der linke Fuß tut mir weh."], "translation": "腳", "emoji": "🦶", "english": "foot"}, {"article": "der", "word": "Fußball", "plural": "", "pos": "noun", "examples": ["Spielt ihr gerne Fußball?"], "translation": "足球", "emoji": "⚽", "english": "football, soccer"}, {"article": "der", "word": "Garten", "plural": "", "pos": "noun", "examples": ["Wir haben leider keinen Garten."], "translation": "花園", "emoji": "🌻", "english": "garden"}, {"article": "der", "word": "Gast, -ä, e", "plural": "", "pos": "noun", "examples": ["Am Wochenende haben wir mehrere Gäste."], "translation": "客人", "emoji": "🤝", "english": "guest"}, {"article": "", "word": "geben", "plural": "", "pos": "verb", "examples": ["Kannst du mir bitte deinen Kugelschreiber geben?", "Es gibt keine Karten mehr."], "translation": "給", "emoji": "🤲", "english": "to give"}, {"article": "", "word": "geboren", "plural": "", "pos": "verb", "examples": ["Ich bin in Zagreb geboren."], "translation": "出生的", "emoji": "🎂", "english": "born"}, {"article": "das", "word": "Geburtsjahr", "plural": "", "pos": "noun", "examples": ["Das Geburtsjahr Ihres Sohnes, bitte?"], "translation": "出生年份", "emoji": "📅", "english": "birth year"}, {"article": "der", "word": "Geburtsort", "plural": "", "pos": "noun", "examples": ["Bitte schreiben Sie Ihren Geburtsort auf das Formular."], "translation": "出生地", "emoji": "📍", "english": "place of birth"}, {"article": "der", "word": "Geburtstag", "plural": "", "pos": "noun", "examples": ["Herzlichen Glückwunsch zum Geburtstag!"], "translation": "生日", "emoji": "🎂", "english": "birthday"}, {"article": "", "word": "gefallen", "plural": "", "pos": "verb", "examples": ["Das gefällt mir."], "translation": "喜歡", "emoji": "❤️", "english": "to like, please"}, {"article": "", "word": "gegen", "plural": "", "pos": "verb", "examples": ["Fahr nicht gegen den Baum!", "Ich bin gegen diese Lösung.", "Wer spielt gegen wen?"], "translation": "對、反對", "emoji": "⚔️", "english": "against, around"}, {"article": "", "word": "gehen", "plural": "", "pos": "verb", "examples": ["Ich weiß nicht, wie das geht.", "Wie geht‘s?", "Jetzt muss ich (aber) leider gehen.", "Ich muss zum Arzt gehen.", "Das geht nicht!"], "translation": "走路", "emoji": "🚶", "english": "to go, walk"}, {"article": "", "word": "gehören", "plural": "", "pos": "verb", "examples": ["Wem gehört das?"], "translation": "屬於", "emoji": "🔗", "english": "to belong to"}, {"article": "das", "word": "Geld", "plural": "", "pos": "noun", "examples": ["Hast du noch Geld?"], "translation": "錢", "emoji": "💰", "english": "money"}, {"article": "das", "word": "Gemüse", "plural": "", "pos": "noun", "examples": ["Gemüse brauchen wir auch noch."], "translation": "蔬菜", "emoji": "🥦", "english": "vegetables"}, {"article": "das", "word": "Gepäck", "plural": "", "pos": "noun", "examples": ["Wollen Sie Ihr Gepäck mitnehmen?"], "translation": "行李", "emoji": "🧳", "english": "luggage, baggage"}, {"article": "", "word": "gerade", "plural": "", "pos": "other", "examples": ["Da kommt er ja gerade."], "translation": "正好、直的", "emoji": "📏", "english": "just, straight"}, {"article": "", "word": "geradeaus", "plural": "", "pos": "other", "examples": ["Gehen Sie immer geradeaus!"], "translation": "直走", "emoji": "⬆️", "english": "straight ahead"}, {"article": "", "word": "gern(e)", "plural": "", "pos": "other", "examples": ["Ich gehe gerne einkaufen."], "translation": "樂意地", "emoji": "😊", "english": "gladly, with pleasure"}, {"article": "das", "word": "Geschäft", "plural": "-e", "pos": "noun", "examples": ["Die Geschäfte schließen um 18.30 Uhr."], "translation": "商店、生意", "emoji": "🏪", "english": "shop, business"}, {"article": "das", "word": "Geschenk", "plural": "-e", "pos": "noun", "examples": ["Danke für das schöne Geschenk."], "translation": "禮物", "emoji": "🎁", "english": "gift, present"}, {"article": "die", "word": "Geschwister (pl.)", "plural": "", "pos": "noun", "examples": ["Ich habe leider keine Geschwister."], "translation": "兄弟姐妹", "emoji": "👨‍👧", "english": "siblings"}, {"article": "das", "word": "Gespräch", "plural": "-e", "pos": "noun", "examples": ["Das Gespräch mit Frau Kunz ist um 14 Uhr."], "translation": "對話", "emoji": "💬", "english": "conversation"}, {"article": "", "word": "gestern", "plural": "", "pos": "verb", "examples": ["Gestern war ich krank."], "translation": "昨天", "emoji": "⏮️", "english": "yesterday"}, {"article": "", "word": "gestorben", "plural": "", "pos": "verb", "examples": ["Meine Frau ist gestern gestorben."], "translation": "去世的", "emoji": "🕯️", "english": "deceased, died"}, {"article": "das", "word": "Getränk", "plural": "-e", "pos": "noun", "examples": ["Mein Lieblingsgetränk ist Tomatensaft."], "translation": "飲料", "emoji": "🥤", "english": "drink, beverage"}, {"article": "das", "word": "Gewicht", "plural": "", "pos": "noun", "examples": ["Bei „Gewicht“ schreibst du: 62 Kilo."], "translation": "重量", "emoji": "⚖️", "english": "weight"}, {"article": "", "word": "gewinnen", "plural": "", "pos": "verb", "examples": ["Wer gewinnt das Spiel?"], "translation": "贏", "emoji": "🏆", "english": "to win"}, {"article": "das", "word": "Glas, -ä, er", "plural": "", "pos": "noun", "examples": ["Bitte noch ein Glas Wein!", "Wir brauchen noch drei Gläser."], "translation": "玻璃杯", "emoji": "🥃", "english": "glass"}, {"article": "", "word": "glauben", "plural": "", "pos": "verb", "examples": ["Sie können mir glauben, es ist so.", "Ich glaube, er kommt gleich."], "translation": "相信", "emoji": "💭", "english": "to believe, think"}, {"article": "", "word": "gleich", "plural": "", "pos": "other", "examples": ["Das ist mir gleich.", "Das ist der gleiche Preis.", "Ich komme gleich."], "translation": "馬上；相同的", "emoji": "⏰", "english": "immediately; same"}, {"article": "das", "word": "Gleis", "plural": "-e", "pos": "noun", "examples": ["Der ICE nach Berlin hält heute an Gleis 12."], "translation": "月台", "emoji": "🚉", "english": "track, platform"}, {"article": "das", "word": "Glück", "plural": "", "pos": "noun", "examples": ["Viel Glück!"], "translation": "幸運、幸福", "emoji": "🍀", "english": "luck, happiness"}, {"article": "", "word": "glücklich", "plural": "", "pos": "other", "examples": ["Meine Kinder sind glücklich verheiratet."], "translation": "幸福的", "emoji": "😊", "english": "happy, lucky"}, {"article": "der", "word": "Glückwunsch", "plural": "", "pos": "noun", "examples": ["Herzlichen Glückwunsch zum Geburtstag."], "translation": "祝賀", "emoji": "🎉", "english": "congratulations"}, {"article": "", "word": "Grad (Celsius)", "plural": "", "pos": "other", "examples": ["Heute haben wir dreißig Grad."], "translation": "攝氏度", "emoji": "🌡️", "english": "degree (Celsius)"}, {"article": "", "word": "gratulieren", "plural": "", "pos": "verb", "examples": ["Ich gratuliere dir!"], "translation": "祝賀", "emoji": "🎉", "english": "to congratulate"}, {"article": "", "word": "grillen", "plural": "", "pos": "verb", "examples": ["Heute grillen wir im Garten."], "translation": "烤肉", "emoji": "🔥", "english": "to barbecue, grill"}, {"article": "", "word": "groß", "plural": "", "pos": "other", "examples": ["Mein Bruder und ich sind gleich groß.", "Frankfurt ist eine große Stadt."], "translation": "大的", "emoji": "📏", "english": "big, tall"}, {"article": "die", "word": "Größe", "plural": "", "pos": "noun", "examples": ["Haben Sie das auch in Größe 40?"], "translation": "尺寸、大小", "emoji": "📏", "english": "size, height"}, {"article": "die", "word": "Großeltern (pl.)", "plural": "", "pos": "noun", "examples": ["Meine Großeltern leben in Japan."], "translation": "祖父母", "emoji": "👴👵", "english": "grandparents"}, {"article": "die", "word": "Großmutter", "plural": "", "pos": "noun", "examples": ["Meine Großmutter heißt Eva."], "translation": "祖母", "emoji": "👵", "english": "grandmother"}, {"article": "der", "word": "Großvater", "plural": "", "pos": "noun", "examples": ["Mein Großvater ist schon 80."], "translation": "祖父", "emoji": "👴", "english": "grandfather"}, {"article": "die", "word": "Gruppe", "plural": "-n", "pos": "noun", "examples": ["Die erste Gruppe beginnt um 16 Uhr."], "translation": "群組", "emoji": "👥", "english": "group"}, {"article": "der", "word": "Gruß, -ü, e", "plural": "", "pos": "noun", "examples": ["Viele Grüße an Ihre Frau.", "Mit freundlichen Grüßen"], "translation": "問候", "emoji": "👋", "english": "greeting"}, {"article": "", "word": "gültig", "plural": "", "pos": "other", "examples": ["Der Pass ist nicht mehr gültig."], "translation": "有效的", "emoji": "✅", "english": "valid"}, {"article": "", "word": "günstig", "plural": "", "pos": "other", "examples": ["Dort gibt es günstige Angebote."], "translation": "便宜的、有利的", "emoji": "💰", "english": "cheap, favorable"}, {"article": "", "word": "gut", "plural": "", "pos": "other", "examples": ["Das finde ich gut.", "Ich komme um 13 Uhr. – Gut!", "Guten Morgen!", "Ein gutes neues Jahr!", "Guten Appetit!"], "translation": "好的", "emoji": "✅", "english": "good"}, {"article": "das", "word": "Haar", "plural": "-e", "pos": "noun", "examples": ["Sie hat lange Haare."], "translation": "頭髮", "emoji": "💇", "english": "hair"}, {"article": "", "word": "haben", "plural": "", "pos": "verb", "examples": ["Ich habe ein neues Auto."], "translation": "有", "emoji": "✅", "english": "to have"}, {"article": "das", "word": "Hähnchen, -", "plural": "", "pos": "noun", "examples": ["Ein Hähnchen mit Pommes bitte!"], "translation": "小雞、雞肉", "emoji": "🍗", "english": "chicken"}, {"article": "die", "word": "Halbpension", "plural": "", "pos": "noun", "examples": ["Möchten Sie Vollpension oder Halbpension?"], "translation": "含早晚餐的住宿", "emoji": "🏨", "english": "half board"}, {"article": "die", "word": "Halle", "plural": "", "pos": "noun", "examples": ["Wir treffen uns in Halle B"], "translation": "大廳", "emoji": "🏛️", "english": "hall"}, {"article": "", "word": "hallo", "plural": "", "pos": "other", "examples": ["Hallo Inge! Wie geht’s?"], "translation": "你好", "emoji": "👋", "english": "hello, hi"}, {"article": "", "word": "halten", "plural": "", "pos": "verb", "examples": ["Dieser Zug hält nicht in Rüdesheim."], "translation": "停止、持有", "emoji": "✋", "english": "to stop, hold"}, {"article": "die", "word": "Haltestelle", "plural": "", "pos": "noun", "examples": ["An der nächsten Haltestelle müssen Sie aussteigen."], "translation": "公車站", "emoji": "🚌", "english": "bus/tram stop"}, {"article": "die", "word": "Hand, -ä, e", "plural": "", "pos": "noun", "examples": ["Er gibt mir die Hand."], "translation": "手", "emoji": "✋", "english": "hand"}, {"article": "das", "word": "Handy", "plural": "-s", "pos": "noun", "examples": ["In der Schule bitte die Handys ausmachen!"], "translation": "手機", "emoji": "📱", "english": "mobile phone, cell phone"}, {"article": "das", "word": "Haus, -ä, er", "plural": "", "pos": "noun", "examples": ["In welchem Haus wohnst du?", "Ich gehe jetzt nach Hause.", "Paul ist nicht zu Hause."], "translation": "房子", "emoji": "🏠", "english": "house"}, {"article": "die", "word": "Hausaufgabe", "plural": "-n", "pos": "noun", "examples": ["Kannst du mir bei den Hausaufgaben helfen?"], "translation": "家庭作業", "emoji": "📝", "english": "homework"}, {"article": "die", "word": "Hausfrau", "plural": "-en/", "pos": "noun", "examples": [], "translation": "家庭主婦", "emoji": "🏠", "english": "housewife"}, {"article": "der", "word": "Hausmann", "plural": "", "pos": "noun", "examples": ["Die Hausfrau/der Hausmann wäscht, kocht und kauft ein."], "translation": "家庭主夫", "emoji": "🏠", "english": "stay-at-home dad"}, {"article": "die", "word": "Heimat", "plural": "", "pos": "noun", "examples": ["Ich komme aus der Schweiz. Das ist meine Heimat."], "translation": "家鄉", "emoji": "🏡", "english": "home, homeland"}, {"article": "", "word": "heiraten", "plural": "", "pos": "verb", "examples": ["Meine Schwester heiratet einen Japaner."], "translation": "結婚", "emoji": "💑", "english": "to get married"}, {"article": "", "word": "heißen", "plural": "", "pos": "verb", "examples": ["Ich heiße Charlotte Meier.", "Wie heißt das auf Deutsch?"], "translation": "叫做", "emoji": "📛", "english": "to be called, named"}, {"article": "", "word": "helfen", "plural": "", "pos": "verb", "examples": ["Können Sie mir helfen, bitte?"], "translation": "幫助", "emoji": "🤝", "english": "to help"}, {"article": "", "word": "hell", "plural": "", "pos": "other", "examples": ["Im Sommer ist es bis 21 Uhr hell."], "translation": "明亮的", "emoji": "💡", "english": "bright, light"}, {"article": "der", "word": "Herd", "plural": "", "pos": "noun", "examples": ["In der neuen Küche fehlt noch der Herd."], "translation": "爐子", "emoji": "🔥", "english": "stove, cooker"}, {"article": "der", "word": "Herr", "plural": "-en", "pos": "noun", "examples": ["Guten Tag, Herr Sommer!"], "translation": "先生", "emoji": "👨", "english": "Mr, gentleman"}, {"article": "", "word": "herzlich", "plural": "", "pos": "other", "examples": ["Herzlichen Glückwunsch!"], "translation": "衷心的", "emoji": "❤️", "english": "cordial, heartfelt"}, {"article": "", "word": "heute", "plural": "", "pos": "other", "examples": ["Heute ist ein schöner Tag."], "translation": "今天", "emoji": "📅", "english": "today"}, {"article": "", "word": "hier", "plural": "", "pos": "other", "examples": ["Hier ist 06131-553221, Pamela Linke.", "Hier wohne ich."], "translation": "這裡", "emoji": "📍", "english": "here"}, {"article": "die", "word": "Hilfe", "plural": "", "pos": "noun", "examples": ["Hilfe! Bitte helfen Sie mir!", "Brauchen Sie meine Hilfe?"], "translation": "幫助", "emoji": "🤝", "english": "help"}, {"article": "", "word": "hinten", "plural": "", "pos": "verb", "examples": ["Die Tür zum Aussteigen ist hinten."], "translation": "後面", "emoji": "⬅️", "english": "at the back, behind"}, {"article": "das", "word": "Hobby", "plural": "-s", "pos": "noun", "examples": ["Meine Hobbys sind Wandern und Schwimmen."], "translation": "興趣", "emoji": "🎯", "english": "hobby"}, {"article": "", "word": "hoch", "plural": "", "pos": "other", "examples": ["Der Mount Everest ist 8.880 Meter hoch."], "translation": "高的", "emoji": "⬆️", "english": "high, tall"}, {"article": "die", "word": "Hochzeit", "plural": "", "pos": "noun", "examples": ["Zur dieser Hochzeit kommen mehr als fünfzig Gäste."], "translation": "婚禮", "emoji": "💒", "english": "wedding"}, {"article": "", "word": "holen", "plural": "", "pos": "verb", "examples": ["Ich hole zwei Flaschen Wasser aus der Küche."], "translation": "取來", "emoji": "🔄", "english": "to fetch, get"}, {"article": "", "word": "hören", "plural": "", "pos": "verb", "examples": ["Hör mal! Was ist das?", "Ich habe das Lied schon mal gehört."], "translation": "聽", "emoji": "👂", "english": "to hear, listen"}, {"article": "das", "word": "Hotel", "plural": "-s", "pos": "noun", "examples": ["Im Urlaub sind wir in einem Hotel am Meer."], "translation": "飯店", "emoji": "🏨", "english": "hotel"}, {"article": "der", "word": "Hund", "plural": "-e", "pos": "noun", "examples": ["Der Hund ist noch jung."], "translation": "狗", "emoji": "🐕", "english": "dog"}, {"article": "der", "word": "Hunger", "plural": "", "pos": "noun", "examples": ["Ich habe Hunger! Wann ist das Essen fertig?"], "translation": "飢餓", "emoji": "🍴", "english": "hunger"}, {"article": "", "word": "ich", "plural": "", "pos": "other", "examples": ["Ich heiße Veronika."], "translation": "我", "emoji": "👤", "english": "I"}, {"article": "", "word": "ihr/ihm/ihn", "plural": "", "pos": "other", "examples": ["Gib ihr/ihm bitte das Buch.", "Ruf ihn bitte an."], "translation": "她的；給他；他（賓格）", "emoji": "👤", "english": "her/him (pronouns)"}, {"article": "", "word": "immer", "plural": "", "pos": "other", "examples": ["Frau Bast kommt immer zu spät."], "translation": "總是", "emoji": "🔄", "english": "always"}, {"article": "", "word": "in", "plural": "", "pos": "other", "examples": ["Ich wohne in Wiesbaden.", "Der Zug kommt in fünf Minuten.", "Frau Rausch arbeitet in einem Geschäft.", "Komm, wir gehen ins Kino."], "translation": "在…裡面", "emoji": "📦", "english": "in, into"}, {"article": "die", "word": "Information", "plural": "-en", "pos": "noun", "examples": ["Wenn Sie Fragen haben, gehen Sie zur Information.", "Wir haben hier wichtige Informationen für Sie."], "translation": "資訊", "emoji": "ℹ️", "english": "information"}, {"article": "", "word": "international", "plural": "", "pos": "other", "examples": ["Unser Deutschkurs ist international: Silvana kommt aus Italien, Conchi aus Spanien, Yin aus China ..."], "translation": "國際的", "emoji": "🌍", "english": "international"}, {"article": "das", "word": "Internet", "plural": "", "pos": "noun", "examples": ["Das findest du im Internet."], "translation": "網際網路", "emoji": "🌐", "english": "internet"}, {"article": "", "word": "ja", "plural": "", "pos": "other", "examples": ["Sind Sie Herr Watanabe? – Ja."], "translation": "是的", "emoji": "✅", "english": "yes"}, {"article": "die", "word": "Jacke", "plural": "-n", "pos": "noun", "examples": ["Zieh dir eine Jacke an. Es ist kalt."], "translation": "夾克", "emoji": "🧥", "english": "jacket"}, {"article": "", "word": "jed", "plural": "", "pos": "other", "examples": ["Blumen kannst du in jedem Bahnhof kaufen."], "translation": "每個", "emoji": "🌐", "english": "every, each"}, {"article": "", "word": "jetzt", "plural": "", "pos": "other", "examples": ["Jetzt machen wir eine Pause."], "translation": "現在", "emoji": "⏰", "english": "now"}, {"article": "der", "word": "Job", "plural": "-s", "pos": "noun", "examples": ["Jenny hat einen neuen Job bei der Post."], "translation": "工作", "emoji": "💼", "english": "job"}, {"article": "der", "word": "Jugendliche", "plural": "-n", "pos": "noun", "examples": ["Viele Jugendliche kaufen gern ein."], "translation": "青少年", "emoji": "👦", "english": "young person, teenager"}, {"article": "", "word": "jung", "plural": "", "pos": "other", "examples": ["Claudia ist 21. – Was? Noch so jung?"], "translation": "年輕的", "emoji": "👦", "english": "young"}, {"article": "der", "word": "Junge", "plural": "-n", "pos": "noun", "examples": ["Ich habe zwei Kinder. Einen Jungen und ein Mädchen."], "translation": "男孩", "emoji": "👦", "english": "boy"}, {"article": "der", "word": "Kaffee", "plural": "", "pos": "noun", "examples": ["Zum Frühstück trinke ich immer Kaffee."], "translation": "咖啡", "emoji": "☕", "english": "coffee"}, {"article": "", "word": "kaputt", "plural": "", "pos": "other", "examples": ["Das Glas war teuer. Es geht sehr leicht kaputt."], "translation": "壞掉的", "emoji": "🔧", "english": "broken"}, {"article": "die", "word": "Karte", "plural": "-n", "pos": "noun", "examples": ["Ich schreibe meinen Bekannten eine Karte aus dem Urlaub.", "Wollen wir Karten spielen?", "Ich möchte auch etwas essen. Bringen Sie mir die Karte, bitte."], "translation": "卡、地圖", "emoji": "🗺️", "english": "card, map, ticket"}, {"article": "", "word": "(Kredit)-Karte, -n", "plural": "", "pos": "other", "examples": ["Kann ich auch mit Karte (be-) zahlen?"], "translation": "（信用）卡", "emoji": "💳", "english": "(credit) card"}, {"article": "die", "word": "Kartoffel", "plural": "-n", "pos": "noun", "examples": ["Für Pommes frites braucht man Kartoffeln."], "translation": "馬鈴薯", "emoji": "🥔", "english": "potato"}, {"article": "die", "word": "Kasse", "plural": "", "pos": "noun", "examples": ["Zahlen Sie bitte an der Kasse."], "translation": "收銀台", "emoji": "💰", "english": "cash register, checkout"}, {"article": "", "word": "kaufen", "plural": "", "pos": "verb", "examples": ["Tim kauft sich ein neues Auto."], "translation": "購買", "emoji": "🛒", "english": "to buy"}, {"article": "", "word": "kein", "plural": "", "pos": "other", "examples": ["Es gibt keine Eintrittskarten mehr."], "translation": "沒有", "emoji": "❌", "english": "no, not a"}, {"article": "", "word": "kennen", "plural": "", "pos": "verb", "examples": ["Kennen Sie diese Frau? – Nein, leider nicht."], "translation": "認識", "emoji": "🤝", "english": "to know (person/place)"}, {"article": "", "word": "kennenlernen", "plural": "", "pos": "verb", "examples": ["Wir sind neu hier. Wir möchten Sie kennenlernen."], "translation": "認識（初次見面）", "emoji": "🤝", "english": "to get to know, meet"}, {"article": "das", "word": "Kind", "plural": "-er", "pos": "noun", "examples": ["Wie viele Kinder haben Sie?"], "translation": "孩子", "emoji": "👶", "english": "child"}, {"article": "der", "word": "Kindergarten", "plural": "", "pos": "noun", "examples": ["Die kleine Laura geht schon in den Kindergarten."], "translation": "幼稚園", "emoji": "🏫", "english": "kindergarten"}, {"article": "das", "word": "Kino", "plural": "-s", "pos": "noun", "examples": ["Wir sehen heute Abend im Kino einen schönen Film."], "translation": "電影院", "emoji": "🎬", "english": "cinema"}, {"article": "der", "word": "Kiosk", "plural": "", "pos": "noun", "examples": ["Am Kiosk bekommen Sie Getränke, Zigaretten und Zeitungen."], "translation": "報攤", "emoji": "🏪", "english": "kiosk, newsstand"}, {"article": "", "word": "klar", "plural": "", "pos": "other", "examples": ["Kommst du mit? – Klar!"], "translation": "清楚的", "emoji": "💡", "english": "clear, of course"}, {"article": "die", "word": "Klasse", "plural": "", "pos": "noun", "examples": ["In unserer Klasse sind fünfundzwanzig Schüler.", "Im Zug fahre ich immer 2. Klasse."], "translation": "班級", "emoji": "📚", "english": "class"}, {"article": "die", "word": "Kleidung", "plural": "", "pos": "noun", "examples": ["Wo finde ich Kleidung? – Jacken im ersten, Jeans im zweiten Stock."], "translation": "衣服", "emoji": "👗", "english": "clothing"}, {"article": "", "word": "klein", "plural": "", "pos": "other", "examples": ["Eltville ist eine kleine Stadt am Rhein."], "translation": "小的", "emoji": "🔍", "english": "small, little"}, {"article": "", "word": "kochen", "plural": "", "pos": "verb", "examples": ["Herr Georgi kann gut kochen."], "translation": "烹飪", "emoji": "🍳", "english": "to cook"}, {"article": "der", "word": "Koffer, –", "plural": "", "pos": "noun", "examples": ["Ist das Ihr Koffer?"], "translation": "行李箱", "emoji": "🧳", "english": "suitcase"}, {"article": "der", "word": "Kollege", "plural": "-n", "pos": "noun", "examples": ["Wie heißt die neue Kollegin?"], "translation": "同事", "emoji": "🤝", "english": "colleague"}, {"article": "", "word": "kommen", "plural": "", "pos": "verb", "examples": ["Woher kommen Sie? – Aus Frankreich.", "Kommst du mit ins Schwimmbad?"], "translation": "來", "emoji": "🚶", "english": "to come"}, {"article": "", "word": "können", "plural": "", "pos": "verb", "examples": ["Ich kann Deutsch und Russisch.", "Können Sie mir helfen?"], "translation": "能夠", "emoji": "💪", "english": "can, to be able to"}, {"article": "das", "word": "Konto", "plural": "", "pos": "noun", "examples": ["Das Geld überweisen wir am ersten März auf Ihr Konto."], "translation": "帳戶", "emoji": "🏦", "english": "account"}, {"article": "der", "word": "Kopf", "plural": "", "pos": "noun", "examples": ["Mein Kopf tut weh!"], "translation": "頭", "emoji": "🧠", "english": "head"}, {"article": "", "word": "kosten", "plural": "", "pos": "verb", "examples": ["Wie viel kostet das? – 10 Euro."], "translation": "花費", "emoji": "💰", "english": "to cost"}, {"article": "", "word": "krank", "plural": "", "pos": "other", "examples": ["Ich kann heute nicht zur Arbeit kommen, ich bin krank und liege im Bett."], "translation": "生病的", "emoji": "🤒", "english": "sick, ill"}, {"article": "", "word": "kriegen", "plural": "", "pos": "verb", "examples": ["Ich kriege 15 Euro in der Stunde für meine Arbeit."], "translation": "得到", "emoji": "🎁", "english": "to get, receive"}, {"article": "die", "word": "Küche", "plural": "", "pos": "noun", "examples": ["Der neue Herd kommt in die Küche."], "translation": "廚房", "emoji": "🍳", "english": "kitchen"}, {"article": "der", "word": "Kuchen", "plural": "", "pos": "noun", "examples": ["Ich nehme ein Stück Kuchen."], "translation": "蛋糕", "emoji": "🎂", "english": "cake"}, {"article": "der", "word": "Kugelschreiber", "plural": "", "pos": "noun", "examples": ["Hast du einen Kugelschreiber für mich?"], "translation": "原子筆", "emoji": "✒️", "english": "ballpoint pen"}, {"article": "der", "word": "Kühlschrank", "plural": "", "pos": "noun", "examples": ["Haben wir noch Milch? – Ja, im Kühlschrank."], "translation": "冰箱", "emoji": "🧊", "english": "fridge, refrigerator"}, {"article": "", "word": "kulturell", "plural": "", "pos": "other", "examples": ["Ich bin kulturell interessiert. Ich gehe oft ins Museum."], "translation": "文化的", "emoji": "🎭", "english": "cultural"}, {"article": "", "word": "sich kümmern", "plural": "", "pos": "verb", "examples": ["Jede Mutter kümmert sich um ihre kleinen Kinder."], "translation": "照顧", "emoji": "🤝", "english": "to take care of"}, {"article": "der", "word": "Kunde", "plural": "-n", "pos": "noun", "examples": ["Einen Moment, bitte. Ich habe eine Kundin."], "translation": "客戶", "emoji": "👤", "english": "customer"}, {"article": "der", "word": "Kurs", "plural": "-e", "pos": "noun", "examples": ["Der Deutschkurs geht bis zum Sommer."], "translation": "課程", "emoji": "📚", "english": "course, class"}, {"article": "", "word": "kurz", "plural": "", "pos": "other", "examples": ["Ricardo hat kurzes Haar."], "translation": "短的", "emoji": "📏", "english": "short, brief"}, {"article": "", "word": "lachen", "plural": "", "pos": "verb", "examples": ["Die Kinder lachen viel."], "translation": "笑", "emoji": "😄", "english": "to laugh"}, {"article": "der", "word": "Laden", "plural": "-ä", "pos": "noun", "examples": ["Im Buchladen können Sie Bücher kaufen."], "translation": "商店", "emoji": "🏪", "english": "shop, store"}, {"article": "das", "word": "Land, -ä, er", "plural": "", "pos": "noun", "examples": ["Italien ist ein schönes Land."], "translation": "國家", "emoji": "🌍", "english": "country, land"}, {"article": "", "word": "lang", "plural": "", "pos": "other", "examples": ["Die Jeans ist zu lang."], "translation": "長的", "emoji": "📏", "english": "long"}, {"article": "", "word": "lange", "plural": "", "pos": "other", "examples": ["Wie lange fährt der Zug von Hamburg nach Berlin?"], "translation": "很長時間", "emoji": "⏳", "english": "for a long time"}, {"article": "", "word": "langsam", "plural": "", "pos": "other", "examples": ["Könnten Sie bitte etwas langsamer sprechen?"], "translation": "慢的", "emoji": "🐢", "english": "slow"}, {"article": "", "word": "laufen", "plural": "", "pos": "verb", "examples": ["Ich möchte nicht Auto fahren, ich möchte laufen."], "translation": "跑步", "emoji": "🏃", "english": "to run, walk"}, {"article": "", "word": "laut", "plural": "", "pos": "other", "examples": ["Nicht so laut! Das Baby schläft."], "translation": "大聲", "emoji": "📢", "english": "loud"}, {"article": "", "word": "leben", "plural": "", "pos": "verb", "examples": ["Sie lebt bei ihrer Schwester.", "Ihre Eltern leben nicht mehr."], "translation": "生活、居住", "emoji": "🌱", "english": "to live; life"}, {"article": "das", "word": "Leben", "plural": "", "pos": "noun", "examples": ["Das Leben in diesem Land ist teuer."], "translation": "生活、居住", "emoji": "🌱", "english": "to live; life"}, {"article": "die", "word": "Lebens-mittel (pl.)", "plural": "", "pos": "noun", "examples": ["Lebensmittel bekommen Sie im Supermarkt."], "translation": "食品", "emoji": "🛒", "english": "food, groceries"}, {"article": "", "word": "ledig", "plural": "", "pos": "other", "examples": ["Sind Sie verheiratet? – Nein. Ledig."], "translation": "單身的", "emoji": "🧍", "english": "single, unmarried"}, {"article": "", "word": "legen", "plural": "", "pos": "verb", "examples": ["Legen Sie das Buch auf den Tisch."], "translation": "放置", "emoji": "📦", "english": "to lay, put"}, {"article": "der", "word": "Lehrer, –", "plural": "", "pos": "noun", "examples": ["Unsere Deutschlehrerin heißt Frau Müller."], "translation": "老師", "emoji": "👨‍🏫", "english": "teacher"}, {"article": "", "word": "leicht", "plural": "", "pos": "other", "examples": ["Der Koffer ist leicht.", "Deutsch ist nicht leicht."], "translation": "輕的、容易的", "emoji": "🪶", "english": "light, easy"}, {"article": "", "word": "leider", "plural": "", "pos": "other", "examples": ["Leider kann ich nicht kommen. Ich muss zum Arzt."], "translation": "遺憾地", "emoji": "😔", "english": "unfortunately"}, {"article": "", "word": "leise", "plural": "", "pos": "other", "examples": ["Seid leise. Die anderen schlafen schon."], "translation": "輕聲地", "emoji": "🔇", "english": "quiet, softly"}, {"article": "", "word": "lernen", "plural": "", "pos": "verb", "examples": ["Wie lange lernen Sie schon Deutsch?"], "translation": "學習", "emoji": "📚", "english": "to learn, study"}, {"article": "", "word": "lesen", "plural": "", "pos": "verb", "examples": ["Ich lese ein Buch von García Márquez."], "translation": "閱讀", "emoji": "📖", "english": "to read"}, {"article": "", "word": "letzt", "plural": "", "pos": "other", "examples": ["Morgen ist der letzte Kurstag."], "translation": "最後的", "emoji": "🏁", "english": "last"}, {"article": "die", "word": "Leute (pl.)", "plural": "", "pos": "noun", "examples": ["In der Disko sind viele Leute."], "translation": "人們", "emoji": "👥", "english": "people"}, {"article": "das", "word": "Licht", "plural": "", "pos": "noun", "examples": ["Wo macht man hier das Licht an?"], "translation": "燈、光", "emoji": "💡", "english": "light"}, {"article": "", "word": "lieb", "plural": "", "pos": "other", "examples": ["Liebe Susanne, lieber Hans,"], "translation": "親愛的", "emoji": "❤️", "english": "dear, kind"}, {"article": "", "word": "lieben", "plural": "", "pos": "verb", "examples": ["Ich liebe dich!"], "translation": "愛", "emoji": "❤️", "english": "to love"}, {"article": "", "word": "lieber", "plural": "", "pos": "other", "examples": ["Sie fährt lieber mit der Bahn."], "translation": "更喜歡", "emoji": "❤️", "english": "rather, prefer"}, {"article": "", "word": "Lieblings", "plural": "", "pos": "exclamation", "examples": ["Mein Lieblingsfilm ist „Schwarze Augen“."], "translation": "最喜愛的", "emoji": "⭐", "english": "favorite"}, {"article": "das", "word": "Lied", "plural": "-er", "pos": "noun", "examples": ["Welches ist dein Lieblingslied?"], "translation": "歌曲", "emoji": "🎵", "english": "song"}, {"article": "", "word": "liegen", "plural": "", "pos": "verb", "examples": ["Um neun Uhr liegt Judith noch im Bett.", "Frankfurt liegt am Main."], "translation": "躺、位於", "emoji": "📍", "english": "to lie, be located"}, {"article": "", "word": "links", "plural": "", "pos": "other", "examples": ["Gehen Sie die nächste Straße links."], "translation": "左邊", "emoji": "⬅️", "english": "left"}, {"article": "der", "word": "Lkw", "plural": "-s", "pos": "noun", "examples": ["Dieser Lastkraftwagen ist sehr groß."], "translation": "卡車", "emoji": "🚚", "english": "truck, lorry"}, {"article": "das", "word": "Lokal", "plural": "", "pos": "noun", "examples": ["In unserer Straße gibt es ein neues Lokal."], "translation": "餐廳、酒吧", "emoji": "🍺", "english": "pub, restaurant"}, {"article": "die", "word": "Lösung", "plural": "-en", "pos": "noun", "examples": ["Die Lösung ist ganz einfach."], "translation": "解答", "emoji": "✅", "english": "solution, answer"}, {"article": "", "word": "lustig", "plural": "", "pos": "other", "examples": ["Frau Mertens ist lustig. Sie lacht immer."], "translation": "有趣的、好笑的", "emoji": "😄", "english": "funny, fun"}, {"article": "", "word": "machen", "plural": "", "pos": "verb", "examples": ["Was machst du heute Abend?", "Ich muss jetzt das Essen machen.", "Das macht 5 Euro 95.", "Das macht nichts."], "translation": "做、製造", "emoji": "🔨", "english": "to do, make"}, {"article": "das", "word": "Mädchen, –", "plural": "", "pos": "noun", "examples": ["Familie Kurz bekommt ein Baby. – Junge oder Mädchen?"], "translation": "女孩", "emoji": "👧", "english": "girl"}, {"article": "", "word": "man", "plural": "", "pos": "other", "examples": ["Hier darf man nicht rauchen."], "translation": "一（泛指人）", "emoji": "👤", "english": "one, you (impersonal)"}, {"article": "der", "word": "Mann, -ä, er", "plural": "", "pos": "noun", "examples": ["Mein Mann arbeitet bei der Polizei."], "translation": "男人、丈夫", "emoji": "👨", "english": "man, husband"}, {"article": "", "word": "männlich", "plural": "", "pos": "other", "examples": ["Kreuzen Sie bitte an: „weiblich“ oder „männlich“."], "translation": "男性的", "emoji": "♂️", "english": "male, masculine"}, {"article": "die", "word": "Maschine", "plural": "-n", "pos": "noun", "examples": ["Die Waschmaschine ist günstig."], "translation": "機器", "emoji": "⚙️", "english": "machine"}, {"article": "das", "word": "Meer", "plural": "", "pos": "noun", "examples": ["Wir machen Urlaub am Meer."], "translation": "海", "emoji": "🌊", "english": "sea, ocean"}, {"article": "", "word": "mehr", "plural": "", "pos": "other", "examples": ["Dieses Auto kostet 1.000 Euro mehr als das andere."], "translation": "更多", "emoji": "➕", "english": "more"}, {"article": "", "word": "mein", "plural": "", "pos": "other", "examples": ["Mein Vater ist Arzt."], "translation": "我的", "emoji": "👤", "english": "my"}, {"article": "", "word": "meist", "plural": "", "pos": "other", "examples": ["Die meisten Norddeutschen sind sehr groß."], "translation": "大多數", "emoji": "📊", "english": "most, mostly"}, {"article": "der", "word": "Mensch", "plural": "-en", "pos": "noun", "examples": ["Die Menschen sind hier anders als bei uns."], "translation": "人、人類", "emoji": "👤", "english": "person, human being"}, {"article": "", "word": "mieten", "plural": "", "pos": "verb", "examples": ["Ich möchte ein Auto mieten."], "translation": "租用", "emoji": "🏠", "english": "to rent"}, {"article": "die", "word": "Miete", "plural": "", "pos": "noun", "examples": ["Die Miete für diese Wohnung ist 600 Euro."], "translation": "租金", "emoji": "🏠", "english": "rent"}, {"article": "die", "word": "Milch", "plural": "", "pos": "noun", "examples": ["Die Milch steht im Kühlschrank."], "translation": "牛奶", "emoji": "🥛", "english": "milk"}, {"article": "", "word": "mit", "plural": "", "pos": "other", "examples": ["Trinken Sie den Kaffee mit Milch?"], "translation": "和、用", "emoji": "🤝", "english": "with, by"}, {"article": "", "word": "mitbringen", "plural": "", "pos": "verb", "examples": ["Ich gehe einkaufen. Soll ich dir was mitbringen?"], "translation": "帶來", "emoji": "🎁", "english": "to bring along"}, {"article": "", "word": "mitkommen", "plural": "", "pos": "verb", "examples": ["Ich gehe ins Kino. Kommst du mit?"], "translation": "一起來", "emoji": "🤝", "english": "to come along"}, {"article": "", "word": "mitmachen", "plural": "", "pos": "verb", "examples": ["Warum macht ihr nicht mit?"], "translation": "參與", "emoji": "🤝", "english": "to participate, join"}, {"article": "", "word": "mitnehmen", "plural": "", "pos": "verb", "examples": ["Nehmen wir meine Schwester ins Kino mit?"], "translation": "帶走", "emoji": "🎒", "english": "to take along"}, {"article": "die", "word": "Mitte", "plural": "", "pos": "noun", "examples": ["Der Lehrer steht in der Mitte des Klassenzimmers."], "translation": "中間", "emoji": "📍", "english": "middle, center"}, {"article": "die", "word": "Möbel (pl.)", "plural": "", "pos": "noun", "examples": ["Sind die Möbel neu?"], "translation": "家具", "emoji": "🪑", "english": "furniture"}, {"article": "", "word": "möchten", "plural": "", "pos": "verb", "examples": ["Was möchten Sie trinken?"], "translation": "想要", "emoji": "💭", "english": "would like to"}, {"article": "", "word": "mögen", "plural": "", "pos": "verb", "examples": ["Magst du Kaffee oder Tee?"], "translation": "喜歡", "emoji": "❤️", "english": "to like"}, {"article": "", "word": "möglich", "plural": "", "pos": "other", "examples": ["Mit dieser Fahrkarte ist die Fahrt ab 9 Uhr möglich."], "translation": "可能的", "emoji": "✅", "english": "possible"}, {"article": "der", "word": "Moment", "plural": "", "pos": "noun", "examples": ["Moment mal bitte!", "Einen Moment bitte."], "translation": "瞬間、時刻", "emoji": "⏰", "english": "moment"}, {"article": "", "word": "morgen", "plural": "", "pos": "verb", "examples": ["Morgen beginnt die Schule um 10 Uhr."], "translation": "明天、早上", "emoji": "🌅", "english": "tomorrow; morning"}, {"article": "", "word": "müde", "plural": "", "pos": "other", "examples": ["Ich bin müde. Ich gehe schlafen."], "translation": "疲倦的", "emoji": "😴", "english": "tired"}, {"article": "der", "word": "Mund", "plural": "", "pos": "noun", "examples": ["Öffnen Sie den Mund."], "translation": "嘴巴", "emoji": "👄", "english": "mouth"}, {"article": "", "word": "müssen", "plural": "", "pos": "verb", "examples": ["Ich muss jeden Tag von 8 Uhr bis 18 Uhr arbeiten."], "translation": "必須", "emoji": "❗", "english": "must, to have to"}, {"article": "die", "word": "Mutter", "plural": "-ü", "pos": "noun", "examples": ["Frau Berghäuser ist die Mutter von Michaela."], "translation": "母親", "emoji": "👩", "english": "mother"}, {"article": "", "word": "nach", "plural": "", "pos": "other", "examples": ["Ich gehe jetzt nach Hause.", "Ich fliege nach München.", "Es ist schon 5 nach 12."], "translation": "去往、之後", "emoji": "➡️", "english": "to, after, according to"}, {"article": "", "word": "nächst", "plural": "", "pos": "other", "examples": ["Sehen wir uns nächste Woche?"], "translation": "下一個", "emoji": "➡️", "english": "next"}, {"article": "der", "word": "Name", "plural": "-n", "pos": "noun", "examples": ["Mein Name ist Thomas Schmidt.", "Mein Vorname ist Thomas; Schmidt ist der Familienname."], "translation": "名字", "emoji": "📛", "english": "name"}, {"article": "", "word": "nehmen", "plural": "", "pos": "verb", "examples": ["Heute gibt es Hähnchen. Das nehme ich.", "Ich nehme den Bus."], "translation": "拿", "emoji": "👐", "english": "to take"}, {"article": "", "word": "nein", "plural": "", "pos": "other", "examples": ["Fährst du auch nach München? – Nein, ich habe keine Zeit."], "translation": "不", "emoji": "❌", "english": "no"}, {"article": "", "word": "neu", "plural": "", "pos": "other", "examples": ["Ich bin der neue Kollege.", "Wir haben eine neue Wohnung."], "translation": "新的", "emoji": "🆕", "english": "new"}, {"article": "", "word": "nicht", "plural": "", "pos": "other", "examples": ["Das stimmt nicht.", "Das ist doch schön, nicht?"], "translation": "不", "emoji": "❌", "english": "not"}, {"article": "", "word": "nichts", "plural": "", "pos": "other", "examples": ["Das macht nichts.", "Hier kaufe ich nichts. Der Laden gefällt mir nicht."], "translation": "沒有什麼", "emoji": "⬜", "english": "nothing"}, {"article": "", "word": "nie", "plural": "", "pos": "other", "examples": ["Er kommt nie pünktlich."], "translation": "從不", "emoji": "🚫", "english": "never"}, {"article": "", "word": "noch", "plural": "", "pos": "other", "examples": ["Vielleicht kommt er noch.", "Wir warten noch fünf Minuten.", "Ich habe noch 20 Euro."], "translation": "還、再", "emoji": "➕", "english": "still, yet, another"}, {"article": "", "word": "normal", "plural": "", "pos": "other", "examples": ["75 kg. Sein Gewicht ist normal."], "translation": "正常的", "emoji": "✅", "english": "normal"}, {"article": "die", "word": "Nummer", "plural": "-n", "pos": "noun", "examples": ["Sie haben Zimmer Nummer zwölf.", "Welche Hausnummer haben Sie?", "Können Sie mir Ihre Nummer geben?"], "translation": "號碼", "emoji": "🔢", "english": "number"}, {"article": "", "word": "nur", "plural": "", "pos": "other", "examples": ["Ich möchte nur ein Glas Wasser."], "translation": "只有", "emoji": "🔢", "english": "only, just"}, {"article": "", "word": "oben", "plural": "", "pos": "verb", "examples": ["Ich wohne oben."], "translation": "上面", "emoji": "⬆️", "english": "above, upstairs"}, {"article": "das", "word": "Obst", "plural": "", "pos": "noun", "examples": ["Im Sommer ist das Obst billig."], "translation": "水果", "emoji": "🍊", "english": "fruit"}, {"article": "", "word": "oder", "plural": "", "pos": "other", "examples": ["Wann können Sie kommen – heute oder morgen?"], "translation": "或者", "emoji": "🔀", "english": "or"}, {"article": "", "word": "öffnen", "plural": "", "pos": "verb", "examples": ["Ich öffne die Tür."], "translation": "打開", "emoji": "🔓", "english": "to open"}, {"article": "", "word": "geöffnet", "plural": "", "pos": "other", "examples": ["Der Laden ist samstags bis 16.00 Uhr geöffnet."], "translation": "開放的", "emoji": "🟢", "english": "open"}, {"article": "", "word": "oft", "plural": "", "pos": "other", "examples": ["Petra treffe ich oft."], "translation": "經常", "emoji": "🔄", "english": "often"}, {"article": "", "word": "ohne", "plural": "", "pos": "other", "examples": ["Ohne Geld kann er nichts kaufen."], "translation": "沒有", "emoji": "❌", "english": "without"}, {"article": "das", "word": "Öl", "plural": "", "pos": "noun", "examples": ["Den Salat machen wir ohne Öl."], "translation": "油", "emoji": "🫙", "english": "oil"}, {"article": "die", "word": "Oma", "plural": "-s", "pos": "noun", "examples": ["Meine Oma ist schon tot."], "translation": "奶奶/外婆", "emoji": "👵", "english": "grandma"}, {"article": "der", "word": "Opa", "plural": "-s", "pos": "noun", "examples": ["Mein Opa heißt Hans."], "translation": "爺爺/外公", "emoji": "👴", "english": "grandpa"}, {"article": "die", "word": "Ordnung", "plural": "", "pos": "noun", "examples": ["Das ist in Ordnung."], "translation": "秩序", "emoji": "✅", "english": "order, tidiness"}, {"article": "der", "word": "Ort", "plural": "-e", "pos": "noun", "examples": ["Der Ort liegt am Meer."], "translation": "地方", "emoji": "📍", "english": "place, location"}, {"article": "das", "word": "Papier", "plural": "", "pos": "noun", "examples": ["Hier sind Papier und Bleistift."], "translation": "紙", "emoji": "📄", "english": "paper"}, {"article": "die", "word": "Papiere (pl.)", "plural": "", "pos": "noun", "examples": ["Haben Sie Ihre Papiere dabei?"], "translation": "證件", "emoji": "🪪", "english": "documents, papers"}, {"article": "der", "word": "Partner", "plural": "-/", "pos": "noun", "examples": [], "translation": "伴侶、夥伴", "emoji": "🤝", "english": "partner"}, {"article": "die", "word": "Partnerin", "plural": "-nen", "pos": "noun", "examples": ["Sie ist meine Partnerin."], "translation": "女伴侶", "emoji": "🤝", "english": "partner (female)"}, {"article": "die", "word": "Party", "plural": "", "pos": "noun", "examples": ["Heute Abend machen wir eine Party."], "translation": "派對", "emoji": "🎉", "english": "party"}, {"article": "der", "word": "Pass, -ä, e", "plural": "", "pos": "noun", "examples": ["Im Hotel brauchst du deinen Pass."], "translation": "護照", "emoji": "📘", "english": "passport"}, {"article": "die", "word": "Pause", "plural": "-n", "pos": "noun", "examples": ["Von 12.00 bis 12.30 Uhr haben wir Mittagspause."], "translation": "休息", "emoji": "⏸️", "english": "break, pause"}, {"article": "der", "word": "Plan, -ä, e", "plural": "", "pos": "noun", "examples": ["Ich kaufe mir einen Stadtplan."], "translation": "計畫、地圖", "emoji": "🗺️", "english": "plan, map"}, {"article": "der", "word": "Platz, -ä, e", "plural": "", "pos": "noun", "examples": ["Tut mir leid, der Platz ist besetzt.", "Bitte nehmen Sie Platz!", "Ich wohne Messeplatz 5."], "translation": "位置、廣場", "emoji": "📍", "english": "place, seat, square"}, {"article": "die", "word": "Polizei", "plural": "", "pos": "noun", "examples": ["Holen Sie die Polizei!"], "translation": "警察", "emoji": "👮", "english": "police"}, {"article": "die", "word": "Pommes frites (pl.)", "plural": "", "pos": "noun", "examples": ["Die Kinder essen Hähnchen mit Pommes frites."], "translation": "薯條", "emoji": "🍟", "english": "french fries"}, {"article": "die", "word": "Post", "plural": "", "pos": "noun", "examples": ["Wo ist die Post, bitte?", "Ist Post da?"], "translation": "郵局、郵件", "emoji": "📮", "english": "post office, mail"}, {"article": "die", "word": "Postleitzahl", "plural": "", "pos": "noun", "examples": ["Wie ist Ihre Postleitzahl?"], "translation": "郵遞區號", "emoji": "📮", "english": "postal code, zip code"}, {"article": "das", "word": "Praktikum", "plural": "", "pos": "noun", "examples": ["Ich mache ein Praktikum bei Siemens."], "translation": "實習", "emoji": "💼", "english": "internship"}, {"article": "die", "word": "Praxis", "plural": "", "pos": "noun", "examples": ["Die Praxis ist ab acht Uhr geöffnet."], "translation": "診所、實踐", "emoji": "🏥", "english": "practice, clinic"}, {"article": "der", "word": "Preis", "plural": "-e", "pos": "noun", "examples": ["Die Preise sind hoch."], "translation": "價格", "emoji": "💰", "english": "price"}, {"article": "das", "word": "Problem", "plural": "-e", "pos": "noun", "examples": ["Mein Problem ist die Sprache."], "translation": "問題", "emoji": "❓", "english": "problem"}, {"article": "der", "word": "Prospekt", "plural": "-e", "pos": "noun", "examples": ["Bitte schicken Sie mir einen Prospekt von Ihrem Hotel."], "translation": "宣傳冊", "emoji": "📋", "english": "brochure, leaflet"}, {"article": "die", "word": "Prüfung", "plural": "", "pos": "noun", "examples": ["Die Prüfung ist am Montag um 8.00 Uhr."], "translation": "考試", "emoji": "📝", "english": "exam, test"}, {"article": "", "word": "pünktlich", "plural": "", "pos": "other", "examples": ["Der Bus fährt pünktlich um acht Uhr.", "Herr Müller ist immer pünktlich."], "translation": "準時的", "emoji": "⏰", "english": "punctual, on time"}, {"article": "", "word": "Rad fahren", "plural": "", "pos": "other", "examples": ["Das Kind kann schon Rad fahren."], "translation": "騎自行車", "emoji": "🚲", "english": "to ride a bicycle"}, {"article": "", "word": "rauchen", "plural": "", "pos": "verb", "examples": ["Ich rauche nicht."], "translation": "吸菸", "emoji": "🚭", "english": "to smoke"}, {"article": "der", "word": "Raum, -ä, e", "plural": "", "pos": "noun", "examples": ["Der Unterricht ist in Raum 332."], "translation": "空間、房間", "emoji": "🏠", "english": "room, space"}, {"article": "die", "word": "Rechnung", "plural": "-en", "pos": "noun", "examples": ["Die Rechnung, bitte."], "translation": "帳單", "emoji": "🧾", "english": "bill, invoice"}, {"article": "", "word": "rechts", "plural": "", "pos": "other", "examples": ["Die Schillerstraße ist hier rechts."], "translation": "右邊", "emoji": "➡️", "english": "right"}, {"article": "", "word": "regnen", "plural": "", "pos": "verb", "examples": ["Heute regnet es."], "translation": "下雨", "emoji": "🌧️", "english": "to rain"}, {"article": "der", "word": "Regen", "plural": "", "pos": "noun", "examples": ["Bei diesem Regen gehe ich nicht raus."], "translation": "雨", "emoji": "🌧️", "english": "rain"}, {"article": "der", "word": "Reis", "plural": "", "pos": "noun", "examples": ["Ich esse gern Reis."], "translation": "米飯", "emoji": "🍚", "english": "rice"}, {"article": "", "word": "reisen", "plural": "", "pos": "verb", "examples": ["Ich reise gern."], "translation": "旅遊", "emoji": "✈️", "english": "to travel"}, {"article": "die", "word": "Reise", "plural": "", "pos": "noun", "examples": ["Wir machen eine Reise nach Österreich."], "translation": "旅行", "emoji": "✈️", "english": "journey, trip"}, {"article": "das", "word": "Reisebüro", "plural": "-s", "pos": "noun", "examples": ["Mein Mann arbeitet im Reisebüro."], "translation": "旅行社", "emoji": "✈️", "english": "travel agency"}, {"article": "der", "word": "Reiseführer", "plural": "", "pos": "noun", "examples": ["Ich kaufe mir einen Reiseführer von Berlin.", "Unser Reiseführer heißt Peter."], "translation": "旅遊指南", "emoji": "🗺️", "english": "travel guide"}, {"article": "", "word": "reparieren", "plural": "", "pos": "verb", "examples": ["Er hat das Fahrrad repariert."], "translation": "修理", "emoji": "🔧", "english": "to repair"}, {"article": "die", "word": "Reparatur", "plural": "", "pos": "noun", "examples": ["Die Reparatur ist sehr teuer."], "translation": "維修", "emoji": "🔧", "english": "repair"}, {"article": "das", "word": "Restaurant", "plural": "-s", "pos": "noun", "examples": ["Wir essen heute in einem Restaurant."], "translation": "餐廳", "emoji": "🍽️", "english": "restaurant"}, {"article": "die", "word": "Rezeption", "plural": "", "pos": "noun", "examples": ["Fragen Sie bitte im Hotel an der Rezeption."], "translation": "接待處", "emoji": "🏨", "english": "reception"}, {"article": "", "word": "richtig", "plural": "", "pos": "other", "examples": ["Habe ich das richtig verstanden?", "Das ist richtig."], "translation": "正確的", "emoji": "✅", "english": "correct, right"}, {"article": "", "word": "riechen", "plural": "", "pos": "verb", "examples": ["Dieser Wein riecht gut."], "translation": "聞", "emoji": "👃", "english": "to smell"}, {"article": "", "word": "ruhig", "plural": "", "pos": "other", "examples": ["Ich möchte ein ruhiges Zimmer."], "translation": "安靜的", "emoji": "🔇", "english": "quiet, calm"}, {"article": "der", "word": "Saft", "plural": "", "pos": "noun", "examples": ["Möchtest du einen Apfelsaft?"], "translation": "果汁", "emoji": "🍊", "english": "juice"}, {"article": "", "word": "sagen", "plural": "", "pos": "verb", "examples": ["Sag mal, wie geht es dir denn?"], "translation": "說", "emoji": "💬", "english": "to say"}, {"article": "der", "word": "Salat", "plural": "", "pos": "noun", "examples": ["Wie schmeckt dir der Salat?"], "translation": "沙拉", "emoji": "🥗", "english": "salad, lettuce"}, {"article": "das", "word": "Salz", "plural": "", "pos": "noun", "examples": ["Herr Ober, kann ich bitte Salz haben?"], "translation": "鹽", "emoji": "🧂", "english": "salt"}, {"article": "", "word": "Satz, -ä, e", "plural": "", "pos": "other", "examples": ["Dieser Satz ist sehr einfach."], "translation": "句子", "emoji": "📖", "english": "sentence"}, {"article": "die", "word": "S-Bahn", "plural": "", "pos": "noun", "examples": ["Ich nehme lieber die S-Bahn."], "translation": "城市鐵路", "emoji": "🚉", "english": "urban railway"}, {"article": "der", "word": "Schalter", "plural": "", "pos": "noun", "examples": ["Gehen Sie bitte zum Schalter drei!"], "translation": "服務窗口", "emoji": "🪟", "english": "counter, switch"}, {"article": "", "word": "scheinen", "plural": "", "pos": "verb", "examples": ["Die Sonne scheint."], "translation": "照耀、似乎", "emoji": "☀️", "english": "to shine, seem"}, {"article": "", "word": "schicken", "plural": "", "pos": "verb", "examples": ["Bitte schicken Sie mir eine E-Mail."], "translation": "寄送", "emoji": "📮", "english": "to send"}, {"article": "das", "word": "Schild", "plural": "-er", "pos": "noun", "examples": ["Haben Sie nicht das Schild gesehen?"], "translation": "牌子", "emoji": "🪧", "english": "sign"}, {"article": "der", "word": "Schinken, –", "plural": "", "pos": "noun", "examples": ["Ich möchte gern ein Schinkenbrot."], "translation": "火腿", "emoji": "🥩", "english": "ham"}, {"article": "", "word": "schlafen", "plural": "", "pos": "verb", "examples": ["Ich schlafe meistens acht Stunden."], "translation": "睡覺", "emoji": "😴", "english": "to sleep"}, {"article": "", "word": "schlecht", "plural": "", "pos": "other", "examples": ["Mir ist schlecht!", "Sie sehen schlecht aus.", "Wir haben schlechtes Wetter."], "translation": "壞的", "emoji": "❌", "english": "bad, poor"}, {"article": "", "word": "schließen", "plural": "", "pos": "verb", "examples": ["Bitte, schließen Sie die Tür."], "translation": "關閉", "emoji": "🔒", "english": "to close"}, {"article": "", "word": "geschlossen", "plural": "", "pos": "verb", "examples": ["Die Bank hat am Samstag geschlossen."], "translation": "關著的", "emoji": "🔒", "english": "closed"}, {"article": "der", "word": "Schluss", "plural": "", "pos": "noun", "examples": ["Ich muss jetzt Schluss machen.", "Zum Schluss gibt er uns allen die Hand."], "translation": "結束", "emoji": "🏁", "english": "end, conclusion"}, {"article": "der", "word": "Schlüssel, –", "plural": "", "pos": "noun", "examples": ["Ich gebe Ihnen noch den Zimmerschlüssel."], "translation": "鑰匙", "emoji": "🔑", "english": "key"}, {"article": "", "word": "schmecken", "plural": "", "pos": "verb", "examples": ["Schmeckt das gut?"], "translation": "品嚐、好吃", "emoji": "😋", "english": "to taste"}, {"article": "", "word": "schnell", "plural": "", "pos": "other", "examples": ["Er fährt schnell."], "translation": "快的", "emoji": "⚡", "english": "fast, quick"}, {"article": "", "word": "schon", "plural": "", "pos": "other", "examples": ["Ist das Essen schon fertig?"], "translation": "已經", "emoji": "✅", "english": "already"}, {"article": "", "word": "schön", "plural": "", "pos": "other", "examples": ["Schönen Urlaub!", "Das ist sehr schön."], "translation": "美麗的", "emoji": "🌸", "english": "beautiful, nice"}, {"article": "der", "word": "Schrank, -ä, e", "plural": "", "pos": "noun", "examples": ["Die Gläser stehen im Schrank."], "translation": "衣櫃、櫃子", "emoji": "🪑", "english": "cupboard, wardrobe"}, {"article": "", "word": "schreiben", "plural": "", "pos": "verb", "examples": ["Er schreibt jeden Tag fünfzig E-Mails."], "translation": "寫", "emoji": "✍️", "english": "to write"}, {"article": "der", "word": "Schuh", "plural": "-e", "pos": "noun", "examples": ["Zieh die Schuhe aus!"], "translation": "鞋子", "emoji": "👟", "english": "shoe"}, {"article": "die", "word": "Schule", "plural": "", "pos": "noun", "examples": ["Meine Tochter geht schon in die Schule.", "Die Schule ist gleich hier um die Ecke."], "translation": "學校", "emoji": "🏫", "english": "school"}, {"article": "der", "word": "Schüler, –", "plural": "", "pos": "noun", "examples": ["In meinem Kurs sind acht Schülerinnen und fünf Schüler."], "translation": "學生", "emoji": "👨‍🎓", "english": "pupil, student"}, {"article": "", "word": "schwer", "plural": "", "pos": "other", "examples": ["Ist Ihr Gepäck sehr schwer?", "Das ist eine schwere Arbeit."], "translation": "重的、難的", "emoji": "⚖️", "english": "heavy, difficult"}, {"article": "die", "word": "Schwester", "plural": "-n", "pos": "noun", "examples": ["Meine Schwester kommt am Dienstag."], "translation": "姐妹", "emoji": "👧", "english": "sister"}, {"article": "", "word": "schwimmen", "plural": "", "pos": "verb", "examples": ["Ich schwimme jeden Tag einen Kilometer."], "translation": "游泳", "emoji": "🏊", "english": "to swim"}, {"article": "das", "word": "Schwimmbad", "plural": "", "pos": "noun", "examples": ["Kommst du mit ins Schwimmbad?"], "translation": "游泳池", "emoji": "🏊", "english": "swimming pool"}, {"article": "der", "word": "See", "plural": "", "pos": "noun", "examples": ["Komm, wir fahren zum Starnberger See."], "translation": "湖", "emoji": "🏞️", "english": "lake"}, {"article": "", "word": "sehen", "plural": "", "pos": "verb", "examples": ["Ich kann dich nicht sehen.", "Ich habe diesen Jungen schon einmal gesehen."], "translation": "看", "emoji": "👀", "english": "to see"}, {"article": "die", "word": "Sehenswürdigkeit", "plural": "", "pos": "noun", "examples": ["-en Welche Sehenswürdigkeiten gibt es in Frankfurt?"], "translation": "景點", "emoji": "🗺️", "english": "sight, attraction"}, {"article": "", "word": "sehr", "plural": "", "pos": "other", "examples": ["Danke sehr!", "Das ist sehr schwer."], "translation": "非常", "emoji": "⬆️", "english": "very"}, {"article": "", "word": "sein", "plural": "", "pos": "other", "examples": ["Herr Müller ist in seinem Zimmer.", "Mir ist kalt.", "Ich bin dreiundzwanzig."], "translation": "是", "emoji": "✅", "english": "to be"}, {"article": "", "word": "an sein", "plural": "", "pos": "other", "examples": ["Das Licht ist noch an."], "translation": "開著的", "emoji": "🔆", "english": "to be on"}, {"article": "", "word": "auf sein", "plural": "", "pos": "other", "examples": ["Das Fenster ist noch auf."], "translation": "開著的（門）", "emoji": "🚪", "english": "to be open"}, {"article": "", "word": "weg sein", "plural": "", "pos": "other", "examples": ["Herr Meier ist schon weg."], "translation": "不在", "emoji": "🚪", "english": "to be gone, away"}, {"article": "", "word": "zu sein", "plural": "", "pos": "other", "examples": ["Die Tür ist zu."], "translation": "關著的", "emoji": "🔒", "english": "to be closed"}, {"article": "", "word": "seit", "plural": "", "pos": "other", "examples": ["Ich wohne seit drei Jahren in Köln."], "translation": "自從", "emoji": "⏳", "english": "since, for (time)"}, {"article": "", "word": "selbstständig", "plural": "", "pos": "other", "examples": ["Er ist selbstständig."], "translation": "獨立的", "emoji": "💪", "english": "independent, self-employed"}, {"article": "", "word": "sich", "plural": "", "pos": "other", "examples": ["Sie müssen sich erst anmelden."], "translation": "自己（反身代詞）", "emoji": "👤", "english": "oneself (reflexive)"}, {"article": "", "word": "sie", "plural": "", "pos": "other", "examples": ["Wie heißt sie?"], "translation": "她、她們、您", "emoji": "👩", "english": "she, they, you (formal)"}, {"article": "", "word": "Sie", "plural": "", "pos": "exclamation", "examples": ["Wie heißen Sie, bitte?"], "translation": "她、她們、您", "emoji": "👩", "english": "she, they, you (formal)"}, {"article": "", "word": "sitzen", "plural": "", "pos": "verb", "examples": ["Wo sitzen Sie?"], "translation": "坐", "emoji": "🪑", "english": "to sit"}, {"article": "", "word": "so", "plural": "", "pos": "other", "examples": ["Sie müssen das so machen!", "Fahren Sie bitte nicht so schnell!", "Meine Frau ist so groß wie ich.", "So, das war‘s/wär‘s!"], "translation": "這樣", "emoji": "💡", "english": "so, like this"}, {"article": "das", "word": "Sofa", "plural": "", "pos": "noun", "examples": ["Das Sofa ist neu."], "translation": "沙發", "emoji": "🛋️", "english": "sofa, couch"}, {"article": "", "word": "sofort", "plural": "", "pos": "other", "examples": ["Bitte antworten Sie sofort."], "translation": "立即", "emoji": "⚡", "english": "immediately, right away"}, {"article": "der", "word": "Sohn, -ö, e", "plural": "", "pos": "noun", "examples": ["Das ist Hans, mein Sohn."], "translation": "兒子", "emoji": "👦", "english": "son"}, {"article": "", "word": "sollen", "plural": "", "pos": "verb", "examples": ["Soll ich kommen?", "Was soll ich mitbringen?"], "translation": "應該", "emoji": "❗", "english": "should, ought to"}, {"article": "die", "word": "Sonne", "plural": "", "pos": "noun", "examples": ["Die Sonne scheint."], "translation": "太陽", "emoji": "☀️", "english": "sun"}, {"article": "", "word": "spät", "plural": "", "pos": "other", "examples": ["Es ist schon spät, ich muss gehen."], "translation": "晚的", "emoji": "🌙", "english": "late"}, {"article": "", "word": "später", "plural": "", "pos": "other", "examples": ["Das können wir später machen."], "translation": "稍後", "emoji": "⏰", "english": "later"}, {"article": "die", "word": "Speisekarte", "plural": "", "pos": "noun", "examples": ["Bringen Sie mir die Speisekarte, bitte."], "translation": "菜單", "emoji": "📋", "english": "menu"}, {"article": "", "word": "spielen", "plural": "", "pos": "verb", "examples": ["Die Kinder spielen draußen.", "Spielen Sie Karten?"], "translation": "玩耍", "emoji": "🎮", "english": "to play"}, {"article": "der", "word": "Sport", "plural": "", "pos": "noun", "examples": ["Ich mache viel Sport."], "translation": "運動", "emoji": "⚽", "english": "sport"}, {"article": "die", "word": "Sprache", "plural": "-n", "pos": "noun", "examples": ["Welche Sprachen sprichst du?"], "translation": "語言", "emoji": "🗣️", "english": "language"}, {"article": "", "word": "sprechen", "plural": "", "pos": "verb", "examples": ["Kann ich (mit) Herrn Klein sprechen?"], "translation": "說", "emoji": "💬", "english": "to speak"}, {"article": "die", "word": "Stadt, -ä, e", "plural": "", "pos": "noun", "examples": ["Heidelberg ist eine alte Stadt."], "translation": "城市", "emoji": "🌆", "english": "city, town"}, {"article": "", "word": "stehen", "plural": "", "pos": "verb", "examples": ["Ich glaube es nicht, aber es steht in der Zeitung.", "Der Bus steht schon an der Haltestelle."], "translation": "站著、在", "emoji": "🧍", "english": "to stand"}, {"article": "die", "word": "Stelle", "plural": "-n", "pos": "noun", "examples": ["Ich habe eine neue Stelle."], "translation": "職位、地點", "emoji": "📍", "english": "position, place"}, {"article": "", "word": "stellen", "plural": "", "pos": "verb", "examples": ["Stell die Tasche rechts in die Ecke!"], "translation": "放置、提問", "emoji": "📦", "english": "to put, place"}, {"article": "der", "word": "Stock", "plural": "", "pos": "noun", "examples": ["Unsere Wohnung liegt im ersten Stock."], "translation": "樓層", "emoji": "🏢", "english": "floor, storey"}, {"article": "die", "word": "Straße", "plural": "-n", "pos": "noun", "examples": ["In welcher Straße wohnen Sie?"], "translation": "街道", "emoji": "🛣️", "english": "street, road"}, {"article": "die", "word": "Straßenbahn", "plural": "", "pos": "noun", "examples": ["Wo fährt die Straßenbahn ab?"], "translation": "電車", "emoji": "🚃", "english": "tram, streetcar"}, {"article": "", "word": "studieren", "plural": "", "pos": "verb", "examples": ["Ich studiere in Mainz."], "translation": "大學學習", "emoji": "🎓", "english": "to study (at university)"}, {"article": "das", "word": "Studium", "plural": "", "pos": "noun", "examples": ["Das Studium beginnt im Oktober."], "translation": "大學學業", "emoji": "🎓", "english": "studies, degree"}, {"article": "der", "word": "Student", "plural": "-en", "pos": "noun", "examples": ["Ich bin Studentin."], "translation": "學生", "emoji": "👨‍🎓", "english": "student"}, {"article": "die", "word": "Stunde", "plural": "-n", "pos": "noun", "examples": ["Ich bin in einer Stunde zurück."], "translation": "小時", "emoji": "⏰", "english": "hour"}, {"article": "", "word": "suchen", "plural": "", "pos": "verb", "examples": ["Suchst du etwas?"], "translation": "找", "emoji": "🔍", "english": "to look for, search"}, {"article": "", "word": "tanzen", "plural": "", "pos": "verb", "examples": ["Tanzen Sie gern?"], "translation": "跳舞", "emoji": "💃", "english": "to dance"}, {"article": "die", "word": "Tasche", "plural": "-n", "pos": "noun", "examples": ["Ich habe die Schlüssel in der Tasche."], "translation": "袋子", "emoji": "👜", "english": "bag"}, {"article": "das", "word": "Taxi", "plural": "-s", "pos": "noun", "examples": ["Es gibt heute keinen Bus mehr. Er fährt mit dem Taxi."], "translation": "計程車", "emoji": "🚕", "english": "taxi"}, {"article": "der", "word": "Tee", "plural": "", "pos": "noun", "examples": ["Ich trinke morgens immer Tee."], "translation": "茶", "emoji": "🍵", "english": "tea"}, {"article": "der", "word": "Teil", "plural": "-e", "pos": "noun", "examples": ["Lies bitte auch den zweiten Teil."], "translation": "部分", "emoji": "📊", "english": "part, section"}, {"article": "", "word": "telefonieren", "plural": "", "pos": "verb", "examples": ["Darf ich mal telefonieren?"], "translation": "打電話", "emoji": "📞", "english": "to make a phone call"}, {"article": "das", "word": "Telefon", "plural": "", "pos": "noun", "examples": ["Haben Sie Telefon?"], "translation": "電話", "emoji": "📞", "english": "telephone"}, {"article": "der", "word": "Termin", "plural": "-e", "pos": "noun", "examples": ["Am besten machen wir sofort einen Termin."], "translation": "預約", "emoji": "📅", "english": "appointment"}, {"article": "der", "word": "Test", "plural": "", "pos": "noun", "examples": ["Der Test war einfach."], "translation": "測試", "emoji": "📝", "english": "test"}, {"article": "", "word": "teuer", "plural": "", "pos": "other", "examples": ["Das ist mir zu teuer."], "translation": "貴的", "emoji": "💰", "english": "expensive"}, {"article": "der", "word": "Text", "plural": "-e", "pos": "noun", "examples": ["Lesen Sie bitte diesen Text."], "translation": "文章", "emoji": "📖", "english": "text"}, {"article": "das", "word": "Thema", "plural": "", "pos": "noun", "examples": ["Wir sprechen heute über das Thema „Essen und Trinken“."], "translation": "主題", "emoji": "📋", "english": "topic, subject"}, {"article": "das", "word": "Ticket", "plural": "-s", "pos": "noun", "examples": ["Wie viel kostet das Ticket?"], "translation": "票券", "emoji": "🎫", "english": "ticket"}, {"article": "der", "word": "Tisch", "plural": "-e", "pos": "noun", "examples": ["Die Fotos liegen auf dem Tisch."], "translation": "桌子", "emoji": "🪑", "english": "table"}, {"article": "die", "word": "Tochter", "plural": "-ö", "pos": "noun", "examples": ["Das ist meine Tochter Katharina."], "translation": "女兒", "emoji": "👧", "english": "daughter"}, {"article": "die", "word": "Toilette", "plural": "-en", "pos": "noun", "examples": ["Wo ist die Toilette, bitte?"], "translation": "廁所", "emoji": "🚻", "english": "toilet, restroom"}, {"article": "die", "word": "Tomate", "plural": "-n", "pos": "noun", "examples": ["Die Tomate ist noch grün."], "translation": "番茄", "emoji": "🍅", "english": "tomato"}, {"article": "", "word": "tot", "plural": "", "pos": "other", "examples": ["Sein Vater ist schon lange tot."], "translation": "死的", "emoji": "🕯️", "english": "dead"}, {"article": "", "word": "treffen", "plural": "", "pos": "verb", "reflexive": true, "examples": ["Ich treffe in der Stadt einen Kollegen.", "Wir treffen uns immer freitags."], "translation": "見面、遇見", "emoji": "🤝", "english": "to meet"}, {"article": "die", "word": "Treppe", "plural": "-n", "pos": "noun", "examples": ["Die Toilette? Die Treppe hoch und dann links."], "translation": "樓梯", "emoji": "🪜", "english": "stairs"}, {"article": "", "word": "trinken", "plural": "", "pos": "verb", "examples": ["Möchtest du etwas trinken?"], "translation": "喝", "emoji": "🥤", "english": "to drink"}, {"article": "", "word": "tschüss", "plural": "", "pos": "other", "examples": ["Junge Leute sagen meistens „tschüss!“ und nicht „auf Wiedersehen“."], "translation": "再見（口語）", "emoji": "👋", "english": "bye, goodbye (informal)"}, {"article": "", "word": "tun", "plural": "", "pos": "other", "examples": ["Ich habe noch etwas zu tun.", "Was tut Ihr Mann?"], "translation": "做", "emoji": "🔨", "english": "to do"}, {"article": "", "word": "über", "plural": "", "pos": "other", "examples": ["Gehen Sie hier über die Straße.", "Er wohnt im zweiten Stock über Familie Meier.", "Sind Sie über 18?"], "translation": "關於、超過", "emoji": "📊", "english": "about, over, above"}, {"article": "", "word": "übernachten", "plural": "", "pos": "verb", "examples": ["Du kannst bei mir übernachten."], "translation": "過夜", "emoji": "🏨", "english": "to stay overnight"}, {"article": "", "word": "überweisen", "plural": "", "pos": "verb", "examples": ["Sie können das Geld auch überweisen."], "translation": "匯款", "emoji": "💳", "english": "to transfer (money)"}, {"article": "die", "word": "Uhr", "plural": "", "pos": "noun", "examples": ["Es ist vier Uhr."], "translation": "時鐘、點（時間）", "emoji": "🕐", "english": "clock; o'clock"}, {"article": "", "word": "um", "plural": "", "pos": "other", "examples": ["Er kommt um sieben Uhr.", "Da kommt er gerade um die Ecke."], "translation": "在…點；圍繞", "emoji": "⏰", "english": "at (time); around"}, {"article": "", "word": "umziehen", "plural": "", "pos": "verb", "examples": ["Nächsten Monat ziehen wir um."], "translation": "搬家；換衣服", "emoji": "📦", "english": "to move (house); to change clothes"}, {"article": "", "word": "und", "plural": "", "pos": "other", "examples": ["Peter und Helmut sind meine Söhne."], "translation": "和", "emoji": "➕", "english": "and"}, {"article": "", "word": "unser", "plural": "", "pos": "other", "examples": ["Das ist unsere Lehrerin."], "translation": "我們的", "emoji": "👥", "english": "our"}, {"article": "", "word": "unten", "plural": "", "pos": "verb", "examples": ["Er wohnt ganz unten im Haus."], "translation": "下面", "emoji": "⬇️", "english": "below, downstairs"}, {"article": "", "word": "unter", "plural": "", "pos": "other", "examples": ["Unter uns wohnt eine Familie mit drei Kindern."], "translation": "在…下面", "emoji": "⬇️", "english": "under, below"}, {"article": "der", "word": "Unterricht", "plural": "", "pos": "noun", "examples": ["Wir haben Unterricht von 8.00 bis 12.00 Uhr."], "translation": "課程", "emoji": "📚", "english": "lesson, class"}, {"article": "", "word": "unterschreiben", "plural": "", "pos": "verb", "examples": ["Wo muss ich unterschreiben?"], "translation": "簽名", "emoji": "✍️", "english": "to sign"}, {"article": "die", "word": "Unterschrift", "plural": "", "pos": "noun", "examples": ["Hier fehlt noch Ihre Unterschrift."], "translation": "簽名", "emoji": "✍️", "english": "signature"}, {"article": "der", "word": "Urlaub", "plural": "", "pos": "noun", "examples": ["Ich nehme im September Urlaub."], "translation": "假期", "emoji": "🏖️", "english": "vacation, holiday"}, {"article": "der", "word": "Vater", "plural": "-ä", "pos": "noun", "examples": ["Mein Vater ist Arbeiter."], "translation": "父親", "emoji": "👨", "english": "father"}, {"article": "", "word": "verboten", "plural": "", "pos": "verb", "examples": ["Hier ist Rauchen verboten."], "translation": "禁止", "emoji": "🚫", "english": "forbidden, not allowed"}, {"article": "", "word": "verdienen", "plural": "", "pos": "verb", "examples": ["Ich verdiene 1.500 Euro im Monat."], "translation": "賺取", "emoji": "💰", "english": "to earn"}, {"article": "der", "word": "Verein", "plural": "", "pos": "noun", "examples": ["Es gibt einen neuen Sportverein in der Stadt."], "translation": "協會、俱樂部", "emoji": "👥", "english": "club, association"}, {"article": "", "word": "verheiratet", "plural": "", "pos": "other", "examples": ["Ich bin verheiratet und habe drei Kinder."], "translation": "已婚的", "emoji": "💑", "english": "married"}, {"article": "", "word": "verkaufen", "plural": "", "pos": "verb", "examples": ["Er verkauft sein altes Auto."], "translation": "賣", "emoji": "🏷️", "english": "to sell"}, {"article": "der", "word": "Verkäufer, –", "plural": "", "pos": "noun", "examples": ["Meine Mutter ist Verkäuferin im Kaufhaus."], "translation": "售貨員", "emoji": "🏪", "english": "salesperson, shop assistant"}, {"article": "", "word": "vermieten", "plural": "", "pos": "verb", "examples": ["Die Wohnung ist schon vermietet."], "translation": "出租", "emoji": "🏠", "english": "to rent out"}, {"article": "der", "word": "Vermieter", "plural": "", "pos": "noun", "examples": ["Unser Vermieter heißt Huber. Er wohnt auch hier."], "translation": "房東", "emoji": "🏠", "english": "landlord"}, {"article": "", "word": "verstehen", "plural": "", "pos": "verb", "examples": ["Können Sie mich verstehen?"], "translation": "理解", "emoji": "💡", "english": "to understand"}, {"article": "der", "word": "Verwandte", "plural": "-n", "pos": "noun", "examples": ["Peter besucht seine Verwandten in Polen."], "translation": "親戚", "emoji": "👨‍👩‍👧", "english": "relative, relation"}, {"article": "", "word": "viel", "plural": "", "pos": "other", "examples": ["Hier regnet es viel."], "translation": "很多", "emoji": "📈", "english": "much, many, a lot"}, {"article": "", "word": "vielleicht", "plural": "", "pos": "other", "examples": ["Ich komme vielleicht mit dem Bus."], "translation": "也許", "emoji": "🤔", "english": "perhaps, maybe"}, {"article": "", "word": "von", "plural": "", "pos": "other", "examples": ["Das Auto von Felix ist kaputt.", "Er kommt gerade von Köln/von zu Hause."], "translation": "從、的", "emoji": "📍", "english": "from, of, by"}, {"article": "", "word": "vor", "plural": "", "pos": "other", "examples": ["Der Termin war vor einer Stunde.", "Das Auto steht vor der Tür."], "translation": "在…前面", "emoji": "⬅️", "english": "before, in front of"}, {"article": "der", "word": "Vorname", "plural": "-n", "pos": "noun", "examples": ["Ich heiße Müller, mein Vorname ist Eva."], "translation": "名字", "emoji": "📛", "english": "first name"}, {"article": "die", "word": "Vorsicht", "plural": "", "pos": "noun", "examples": ["Vorsicht! Da kommt ein Auto."], "translation": "小心！", "emoji": "⚠️", "english": "caution!, careful!"}, {"article": "", "word": "vorstellen", "plural": "", "pos": "verb", "reflexive": true, "examples": ["Wir wollen uns kennenlernen. Können Sie sich bitte vorstellen?"], "translation": "介紹、想像", "emoji": "🤝", "english": "to introduce; to imagine"}, {"article": "die", "word": "Vorwahl", "plural": "", "pos": "noun", "examples": ["Wie ist die Vorwahl von München?"], "translation": "區號", "emoji": "📞", "english": "area code, dialing code"}, {"article": "", "word": "wandern", "plural": "", "pos": "verb", "examples": ["Wir wandern um den Chiemsee."], "translation": "健行", "emoji": "🥾", "english": "to hike"}, {"article": "", "word": "wann", "plural": "", "pos": "other", "examples": ["Wann bist du fertig?", "Wann kann ich Sie anrufen?", "Wann sind Sie geboren?"], "translation": "什麼時候", "emoji": "❓", "english": "when"}, {"article": "", "word": "warten", "plural": "", "pos": "verb", "examples": ["Können Sie ein paar Minuten warten?", "Auf wen warten Sie?"], "translation": "等待", "emoji": "⏳", "english": "to wait"}, {"article": "", "word": "warum", "plural": "", "pos": "other", "examples": ["Warum kommt er nicht?"], "translation": "為什麼", "emoji": "❓", "english": "why"}, {"article": "", "word": "was", "plural": "", "pos": "other", "examples": ["Was ist das?", "Was möchten Sie?"], "translation": "什麼", "emoji": "❓", "english": "what"}, {"article": "", "word": "was für ein", "plural": "", "pos": "other", "examples": ["Was für eine Farbe möchten Sie?"], "translation": "什麼", "emoji": "❓", "english": "what"}, {"article": "", "word": "waschen", "plural": "", "pos": "verb", "reflexive": true, "examples": ["Wo kann ich mir die Hände waschen?", "Ich muss morgen waschen."], "translation": "洗", "emoji": "🚿", "english": "to wash"}, {"article": "das", "word": "Wasser", "plural": "", "pos": "noun", "examples": ["Ein Glas Wasser, bitte."], "translation": "水", "emoji": "💧", "english": "water"}, {"article": "", "word": "weh tun", "plural": "", "pos": "other", "examples": ["Ich muss zum Arzt. Mein Bein tut weh."], "translation": "疼痛", "emoji": "🤕", "english": "to hurt, ache"}, {"article": "", "word": "weiblich", "plural": "", "pos": "other", "examples": ["Kreuzen Sie bitte an: „weiblich“ oder „männlich“."], "translation": "女性的", "emoji": "♀️", "english": "female, feminine"}, {"article": "der", "word": "Wein", "plural": "", "pos": "noun", "examples": ["Nein danke, ich möchte keinen Wein."], "translation": "葡萄酒", "emoji": "🍷", "english": "wine"}, {"article": "", "word": "weit", "plural": "", "pos": "other", "examples": ["Zum Bahnhof ist es nicht weit."], "translation": "遠的", "emoji": "📏", "english": "far"}, {"article": "", "word": "weiter", "plural": "", "pos": "other", "examples": ["Der Bus fährt nicht weiter."], "translation": "繼續", "emoji": "➡️", "english": "further, continue"}, {"article": "", "word": "welch", "plural": "", "pos": "other", "examples": ["Welches Buch möchtest du?"], "translation": "哪個", "emoji": "❓", "english": "which, what"}, {"article": "die", "word": "Welt", "plural": "", "pos": "noun", "examples": ["Es gibt viele Probleme auf der Welt."], "translation": "世界", "emoji": "🌍", "english": "world"}, {"article": "", "word": "wenig", "plural": "", "pos": "other", "examples": ["Ich habe leider nur wenig verstanden.", "Er verdient wenig."], "translation": "少的", "emoji": "🔢", "english": "little, few"}, {"article": "", "word": "wer", "plural": "", "pos": "other", "examples": ["Wer ist das?"], "translation": "誰", "emoji": "❓", "english": "who"}, {"article": "", "word": "werden", "plural": "", "pos": "verb", "examples": ["Mein Sohn will Arzt werden."], "translation": "變成、將會", "emoji": "🔄", "english": "to become, will"}, {"article": "das", "word": "Wetter", "plural": "", "pos": "noun", "examples": ["Wir hatten schlechtes Wetter."], "translation": "天氣", "emoji": "🌤️", "english": "weather"}, {"article": "", "word": "wichtig", "plural": "", "pos": "other", "examples": ["Dieses Formular ist sehr wichtig."], "translation": "重要的", "emoji": "⭐", "english": "important"}, {"article": "", "word": "wie", "plural": "", "pos": "other", "examples": ["Wie heißt du?", "Er schreibt wie ein Kind.", "Meine Frau ist so groß wie ich.", "Wie soll ich das machen?", "Wie groß ist die Wohnung?", "Wie bitte?", "Wie lange bist du schon hier?"], "translation": "怎樣、如何", "emoji": "❓", "english": "how, like"}, {"article": "", "word": "wiederholen", "plural": "", "pos": "verb", "examples": ["Können Sie das bitte wiederholen?"], "translation": "重複", "emoji": "🔄", "english": "to repeat"}, {"article": "das", "word": "Wiederhören", "plural": "", "pos": "noun", "examples": ["Wir müssen jetzt Schluss machen.", "Also auf Wiederhören!"], "translation": "再見（電話）", "emoji": "📞", "english": "goodbye (on phone)"}, {"article": "das", "word": "Wiedersehen", "plural": "", "pos": "noun", "examples": ["Auf Wiedersehen!"], "translation": "再見", "emoji": "👋", "english": "goodbye"}, {"article": "", "word": "wie viel", "plural": "", "pos": "other", "examples": ["Wie viel Milch nehmen Sie?"], "translation": "怎樣、如何", "emoji": "❓", "english": "how, like"}, {"article": "", "word": "willkommen", "plural": "", "pos": "verb", "examples": ["Herzlich willkommen!"], "translation": "歡迎", "emoji": "🎉", "english": "welcome"}, {"article": "der", "word": "Wind", "plural": "", "pos": "noun", "examples": ["Der Wind kommt aus Osten."], "translation": "風", "emoji": "💨", "english": "wind"}, {"article": "", "word": "wir", "plural": "", "pos": "other", "examples": ["Wir lernen Deutsch."], "translation": "我們", "emoji": "👥", "english": "we"}, {"article": "", "word": "wissen", "plural": "", "pos": "verb", "examples": ["Weißt du, wie er heißt?"], "translation": "知道", "emoji": "💡", "english": "to know (fact)"}, {"article": "", "word": "wo", "plural": "", "pos": "other", "examples": ["Wo waren Sie im Urlaub?", "Wo ist die Post?", "Wo sind Sie geboren?"], "translation": "哪裡", "emoji": "📍", "english": "where"}, {"article": "", "word": "woher", "plural": "", "pos": "other", "examples": ["Woher kommen Sie?"], "translation": "從哪裡", "emoji": "📍", "english": "where from"}, {"article": "", "word": "wohin", "plural": "", "pos": "other", "examples": ["Wohin fährt dieser Bus?", "Wohin wollen Sie am Wochenende?"], "translation": "去哪裡", "emoji": "📍", "english": "where to"}, {"article": "", "word": "wohnen", "plural": "", "pos": "verb", "examples": ["Ich wohne in München."], "translation": "住", "emoji": "🏠", "english": "to live (reside)"}, {"article": "die", "word": "Wohnung", "plural": "-en", "pos": "noun", "examples": ["Seit wann haben Sie diese Wohnung?"], "translation": "公寓、住所", "emoji": "🏠", "english": "apartment, flat"}, {"article": "", "word": "wollen", "plural": "", "pos": "verb", "examples": ["Wollen Sie einen Kaffee trinken?"], "translation": "想要", "emoji": "💭", "english": "to want to"}, {"article": "das", "word": "Wort, -ö, er/-e", "plural": "", "pos": "noun", "examples": ["Ich kenne das Wort nicht."], "translation": "單字", "emoji": "📖", "english": "word"}, {"article": "", "word": "wunderbar", "plural": "", "pos": "other", "examples": ["Das Essen schmeckt wunderbar."], "translation": "太棒了", "emoji": "🌟", "english": "wonderful, great"}, {"article": "", "word": "zahlen", "plural": "", "pos": "verb", "examples": ["Zahlen, bitte!"], "translation": "付款", "emoji": "💳", "english": "to pay"}, {"article": "die", "word": "Zeit", "plural": "", "pos": "noun", "examples": ["Ich habe heute keine Zeit."], "translation": "時間", "emoji": "⏰", "english": "time"}, {"article": "", "word": "zurzeit", "plural": "", "pos": "other", "examples": ["Zurzeit habe ich sehr viel zu tun."], "translation": "目前", "emoji": "⏰", "english": "currently, at present"}, {"article": "die", "word": "Zeitung", "plural": "-en", "pos": "noun", "examples": ["Ich lese gern Zeitung."], "translation": "報紙", "emoji": "📰", "english": "newspaper"}, {"article": "die", "word": "Zigarette", "plural": "-n", "pos": "noun", "examples": ["Wie teuer sind die Zigaretten?"], "translation": "香菸", "emoji": "🚭", "english": "cigarette"}, {"article": "das", "word": "Zimmer, –", "plural": "", "pos": "noun", "examples": ["Das Zimmer ist groß.", "Öffne im Schlafzimmer das Fenster, bitte!", "Die Wohnung hat drei Zimmer.", "Ich habe ein Zimmer bestellt."], "translation": "房間", "emoji": "🛏️", "english": "room"}, {"article": "der", "word": "Zoll", "plural": "", "pos": "noun", "examples": ["Wir müssen noch durch den Zoll."], "translation": "海關", "emoji": "🛃", "english": "customs"}, {"article": "", "word": "zu", "plural": "", "pos": "other", "examples": ["Der Bus fährt zum Bahnhof.", "Ich gehe zu Fuß.", "Ich bin zu Hause."], "translation": "到；關著", "emoji": "🚪", "english": "to, at, closed"}, {"article": "", "word": "zufrieden", "plural": "", "pos": "verb", "examples": ["Ich bin mit der Wohnung zufrieden."], "translation": "滿意的", "emoji": "😊", "english": "satisfied, content"}, {"article": "der", "word": "Zug, -ü, e", "plural": "", "pos": "noun", "examples": ["Ich fahre gern mit dem Zug."], "translation": "火車", "emoji": "🚂", "english": "train"}, {"article": "", "word": "zurück", "plural": "", "pos": "other", "examples": ["Einmal Frankfurt und zurück.", "Wann kommst du zurück?"], "translation": "回來、回去", "emoji": "↩️", "english": "back, return"}, {"article": "", "word": "zusammen", "plural": "", "pos": "verb", "examples": ["Sollen wir zusammen essen gehen?", "Das macht zusammen 2 Euro 80."], "translation": "一起", "emoji": "🤝", "english": "together"}, {"article": "", "word": "zwischen", "plural": "", "pos": "verb", "examples": ["Heidelberg liegt zwischen Frankfurt und Stuttgart.", "Zwischen 8 und 10 Uhr bin ich zu Hause."], "translation": "之間", "emoji": "↔️", "english": "between"}];
+
+const GROUP_MAP=(()=>{
+  const m={};
+  ["hallo", "tschüss", "danke", "bitte", "ja", "nein", "herzlich", "willkommen", "entschuldigen", "entschuldigung", "wiedersehen", "wiederhören", "gruß, -ü, e", "gern(e)", "gut", "achtung", "glückwunsch", "gratulieren", "feier"].forEach(w=>m[w]=1);
+  ["uhr", "zeit", "stunde", "datum", "monat", "wann", "jetzt", "heute", "gestern", "morgen", "spät", "später", "dauern", "termin", "bald", "lange", "kurz", "pünktlich", "moment", "einmal", "immer", "nie", "oft", "dann", "gleich", "sofort", "zurzeit", "früher", "letzt", "nächst", "grad (celsius)"].forEach(w=>m[w]=2);
+  ["familie", "mutter", "vater", "kind", "bruder", "schwester", "sohn, -ö, e", "tochter", "mann, -ä, er", "frau", "eltern (pl.)", "großeltern (pl.)", "großmutter", "großvater", "oma", "opa", "verwandte", "partner", "partnerin", "freund", "heiraten", "verheiratet", "ledig", "hochzeit", "geschwister (pl.)", "ehefrau", "ehemann", "baby", "der/die bekannte, -n", "jugendliche", "erwachsene"].forEach(w=>m[w]=3);
+  ["essen", "trinken", "kaffee", "tee", "wasser", "bier", "wein", "brot", "butter", "milch", "apfel", "banane", "fisch", "fleisch", "gemüse", "obst", "reis", "salat", "kartoffel", "schinken, –", "ei", "salz", "öl", "tomate", "brötchen, –", "hähnchen, -", "saft", "birne", "schmecken", "kochen", "hunger", "durst", "frühstück", "frühstücken", "speisekarte", "getränk", "glas, -ä, er", "flasche", "appetit", "grillen", "pommes frites (pl.)", "bäckerei"].forEach(w=>m[w]=4);
+  ["haus, -ä, er", "wohnung", "zimmer, –", "küche", "bad", "tisch", "bett", "sofa", "schrank, -ä, e", "kühlschrank", "herd", "möbel (pl.)", "balkon", "garten", "mieten", "miete", "vermieter", "wohnen", "adresse", "doppelzimmer", "einzelzimmer", "umziehen", "aufzug, -ü, e", "treppe", "licht", "halle", "heimat", "raum, -ä, e", "ecke", "schlüssel, –", "ordnung"].forEach(w=>m[w]=5);
+  ["beruf", "arbeiten", "arbeit", "job", "chef", "kollege", "firma", "studieren", "studium", "student", "lehrer, –", "schüler, –", "schule", "lernen", "kurs", "unterricht", "klasse", "aufgabe", "hausaufgabe", "prüfung", "praktikum", "verdienen", "stelle", "arbeitslos", "buchstabieren", "wiederholen", "erklären", "ergebnis", "beamte", "selbstständig", "anfang", "anfangen"].forEach(w=>m[w]=6);
+  ["fahren", "bus", "zug, -ü, e", "auto", "fahrrad, -ä, er", "bahn", "s-bahn", "straßenbahn", "taxi", "flugzeug", "flughafen", "abfahrt", "ankunft", "bahnhof", "bahnsteig", "ticket", "fahrkarte", "reise", "reisen", "reisebüro", "ausflug", "gepäck", "koffer, –", "abfahren", "ankommen", "aussteigen", "einsteigen", "lkw", "abflug", "reiseführer", "urlaub", "wandern", "rad fahren", "autobahn", "haltestelle"].forEach(w=>m[w]=7);
+  ["kaufen", "geld", "preis", "kasse", "zahlen", "bezahlen", "teuer", "billig", "laden", "geschäft", "einkaufen", "rechnung", "kosten", "angebot", "verkaufen", "bar", "(kredit)-karte, -n", "empfehlen", "günstig", "konto", "überweisen", "bestellen", "verkäufer, –", "kunde", "eintritt", "geschenk"].forEach(w=>m[w]=8);
+  ["kopf", "hand, -ä, e", "arm", "bein", "auge", "mund", "haar", "bauch", "fuß, -ü, e", "krank", "fieber", "weh tun", "arzt, -ä, e", "praxis", "doktor", "duschen", "waschen", "schlafen", "müde", "dusche", "rauchen", "riechen", "sich kümmern"].forEach(w=>m[w]=9);
+  ["telefon", "telefonieren", "e-mail", "brief", "schreiben", "anrufen", "anruf", "schicken", "internet", "handy", "computer, –", "sagen", "sprechen", "fragen", "antworten", "hören", "ansage", "anruf-beantworter", "fax", "cd", "text", "anzeige", "drucker, –", "drucken", "anklicken", "empfänger, –", "absender", "schild", "durchsage", "briefmarke", "bogen"].forEach(w=>m[w]=10);
+  ["stadt, -ä, e", "straße", "platz, -ä, e", "post", "café", "hotel", "kino", "bahnhof", "sehenswürdigkeit", "polizei", "ausgang", "eingang", "kiosk", "disco", "schwimmbad", "rezeption", "schalter", "auskunft, -ü, e", "automat", "besichtigen", "führung"].forEach(w=>m[w]=11);
+  ["sport", "spielen", "fußball", "schwimmen", "tanzen", "lesen", "fernsehen", "feiern", "hobby", "freizeit", "film", "lied", "foto", "buch, -ü, er", "zeitung", "party", "verein", "gewinnen"].forEach(w=>m[w]=12);
+  ["groß", "klein", "alt", "neu", "schön", "wichtig", "richtig", "falsch", "schnell", "langsam", "lang", "leicht", "schwer", "laut", "leise", "hell", "frei", "viel", "wenig", "jung", "lustig", "glücklich", "böse", "gültig", "fertig", "fremd", "besetzt", "besser", "best", "lieb", "ruhig", "eilig", "tot", "möglich", "normal", "automatisch", "männlich", "weiblich", "international", "einfach", "kaputt", "beliebt", "bekannt", "zufrieden", "verboten", "billig", "teuer", "kalt", "warm"].forEach(w=>m[w]=13);
+  ["ich", "er", "sie", "wir", "sich", "man", "dich", "dies", "dein", "mein", "unser", "euer", "kein", "der, die, das", "und", "oder", "aber", "denn", "auch", "nicht", "nichts", "nur", "sehr", "noch", "schon", "so", "hier", "dort, -her, -hin", "links", "rechts", "geradeaus", "hinten", "draußen", "in", "an", "auf", "bei", "bis", "durch", "für", "gegen", "mit", "nach", "ohne", "über", "um", "unter", "von", "vor", "zu", "zwischen", "seit", "aus", "vielleicht", "leider", "also", "wie", "wo", "woher", "wohin", "warum", "was", "wer", "welch", "wie viel", "was für ein", "zum beispiel/z. b.", "circa/ca.", "satz, -ä, e", "buchstabe", "wort, -ö, er/-e", "ihr/ihm/ihn"].forEach(w=>m[w]=14);
+  return m;
+})();
+
+function getWordGroup(w){
+  const k=w.word.toLowerCase();
+  return GROUP_MAP[k]||GROUP_MAP[(w.article?w.article+' ':'')+k]||15;
+}
+
+function pickSessionGroup(filterFn){
+  const now=Date.now(),counts={};
+  VOCAB.forEach(w=>{
+    const st=getWordState(w);
+    const isDue=!st.seen||st.due<=now;
+    if(isDue&&(!filterFn||filterFn(w))){const g=getWordGroup(w);counts[g]=(counts[g]||0)+1;}
+  });
+  const entries=Object.entries(counts);
+  if(!entries.length)return null;
+  return parseInt(entries.sort((a,b)=>b[1]-a[1])[0][0]);
+}
+
+function buildGroupQueue(group,filterFn,limit=15){
+  const now=Date.now();
+  let due=VOCAB.filter(w=>{
+    const st=getWordState(w);
+    return(!st.seen||st.due<=now)&&getWordGroup(w)===group&&(!filterFn||filterFn(w));
+  });
+  let pool=shuffle([...due]).slice(0,limit);
+  if(pool.length<limit){
+    const extra=VOCAB.filter(w=>getWordGroup(w)===group&&(!filterFn||filterFn(w))&&!pool.includes(w));
+    pool=[...pool,...shuffle([...extra]).slice(0,limit-pool.length)];
+  }
+  return pool;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// STORAGE
+// ══════════════════════════════════════════════════════════════════
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem('de_a1_progress') || '{}'); } catch { return {}; }
+}
+function saveProgress(p) { localStorage.setItem('de_a1_progress', JSON.stringify(p)); }
+function loadStats() {
+  try { return JSON.parse(localStorage.getItem('de_a1_stats') || '{"xp":0,"streak":0,"lastDate":"","totalCorrect":0}'); }
+  catch { return {xp:0,streak:0,lastDate:'',totalCorrect:0}; }
+}
+function saveStats(s) { localStorage.setItem('de_a1_stats', JSON.stringify(s)); }
+function getPAT() { return localStorage.getItem('de_a1_pat') || ''; }
+function setPAT(t) { localStorage.setItem('de_a1_pat', t); }
+function getGistId() { return localStorage.getItem('de_a1_gist_id') || ''; }
+function setGistId(id) { localStorage.setItem('de_a1_gist_id', id); }
+
+let progress = loadProgress();
+let stats = loadStats();
+let sessionStreak = 0;
+let syncTimeout = null;
+let lastSyncTime = null;
+let syncState = 'idle'; // idle | syncing | synced | error
+
+// ══════════════════════════════════════════════════════════════════
+// GIST SYNC
+// ══════════════════════════════════════════════════════════════════
+const GIST_FILENAME = 'de_a1_vocab_progress.json';
+
+function setSyncState(state, msg) {
+  syncState = state;
+  const dot = document.getElementById('sync-dot');
+  if (dot) {
+    dot.className = 'sync-dot ' + (state === 'synced' ? 'synced' : state === 'syncing' ? 'syncing' : state === 'error' ? 'error' : '');
+    dot.title = msg || '同步狀態';
+  }
+  const icon = document.getElementById('settings-sync-icon');
+  const main = document.getElementById('settings-sync-main');
+  const sub  = document.getElementById('settings-sync-sub');
+  if (icon) icon.textContent = state === 'synced' ? '🟢' : state === 'syncing' ? '🟡' : state === 'error' ? '🔴' : '⚪';
+  if (main) main.textContent = state === 'synced' ? '同步正常' : state === 'syncing' ? '同步中...' : state === 'error' ? '同步失敗' : '未設定同步';
+  if (sub) sub.textContent = msg || (state === 'synced' ? '上次同步：' + (lastSyncTime ? lastSyncTime.toLocaleTimeString() : '未知') : state === 'error' ? '請檢查 PAT 是否有效' : '設定 GitHub PAT 以啟用跨裝置同步');
+}
+
+async function gistRequest(method, path, body) {
+  const pat = getPAT();
+  if (!pat) return null;
+  try {
+    const res = await fetch('https://api.github.com' + path, {
+      method,
+      headers: { 'Authorization': 'token ' + pat, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    if (!res.ok) return { error: res.status };
+    return await res.json();
+  } catch(e) { return { error: e.message }; }
+}
+
+async function syncToGist() {
+  const pat = getPAT();
+  if (!pat) return;
+  setSyncState('syncing', '同步中...');
+  const payload = { progress, stats };
+  const content = JSON.stringify(payload);
+  let gistId = getGistId();
+
+  if (gistId) {
+    // Update existing
+    const res = await gistRequest('PATCH', '/gists/' + gistId, { files: { [GIST_FILENAME]: { content } } });
+    if (res && !res.error) {
+      lastSyncTime = new Date();
+      setSyncState('synced', '已同步 ' + lastSyncTime.toLocaleTimeString());
+      return;
+    }
+    // Gist not found, create new
+    gistId = '';
+    setGistId('');
+  }
+
+  // Create new gist
+  const res = await gistRequest('POST', '/gists', {
+    description: 'Deutsch A1 Vocab Progress',
+    public: false,
+    files: { [GIST_FILENAME]: { content } }
+  });
+  if (res && res.id) {
+    setGistId(res.id);
+    lastSyncTime = new Date();
+    setSyncState('synced', '已同步 ' + lastSyncTime.toLocaleTimeString());
+  } else {
+    setSyncState('error', '同步失敗，請確認 PAT 正確');
+  }
+}
+
+async function loadFromGist() {
+  const pat = getPAT();
+  if (!pat) return false;
+  let gistId = getGistId();
+  setSyncState('syncing', '載入雲端進度...');
+
+  if (!gistId) {
+    // Search for existing gist
+    const list = await gistRequest('GET', '/gists?per_page=30');
+    if (!list || list.error) { setSyncState('error'); return false; }
+    const found = list.find(g => g.files && g.files[GIST_FILENAME]);
+    if (found) { gistId = found.id; setGistId(gistId); }
+    else { setSyncState('idle', '未找到雲端進度，將建立新同步'); return false; }
+  }
+
+  const res = await gistRequest('GET', '/gists/' + gistId);
+  if (!res || res.error || !res.files || !res.files[GIST_FILENAME]) {
+    setSyncState('error', '讀取失敗'); return false;
+  }
+  try {
+    const raw = res.files[GIST_FILENAME].content;
+    const data = JSON.parse(raw);
+    // Merge: take higher level for each word, take higher XP
+    if (data.progress) {
+      for (const [k, v] of Object.entries(data.progress)) {
+        const local = progress[k];
+        if (!local || (v.level || 0) > (local.level || 0)) progress[k] = v;
+      }
+      saveProgress(progress);
+    }
+    if (data.stats) {
+      if ((data.stats.xp || 0) > (stats.xp || 0)) { stats = data.stats; saveStats(stats); }
+    }
+    lastSyncTime = new Date();
+    setSyncState('synced', '已同步 ' + lastSyncTime.toLocaleTimeString());
+    updateStatsUI();
+    return true;
+  } catch(e) { setSyncState('error', '解析失敗'); return false; }
+}
+
+function scheduleSyncDebounced() {
+  if (syncTimeout) clearTimeout(syncTimeout);
+  syncTimeout = setTimeout(() => syncToGist(), 3000);
+}
+
+function manualSync() {
+  if (!getPAT()) { showScreen('settings'); showToast('請先設定 GitHub PAT'); return; }
+  syncToGist().then(() => updateStatsUI());
+}
+
+async function savePAT() {
+  const input = document.getElementById('pat-input');
+  const pat = input.value.trim();
+  if (!pat) { showToast('請輸入 PAT'); return; }
+  setPAT(pat);
+  document.getElementById('pat-status').textContent = '測試中...';
+  document.getElementById('pat-status').style.color = 'var(--text2)';
+  // Test by fetching user info
+  try {
+    const res = await fetch('https://api.github.com/user', {
+      headers: { 'Authorization': 'token ' + pat, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (res.ok) {
+      const user = await res.json();
+      document.getElementById('pat-status').textContent = '✅ 驗證成功：' + user.login;
+      document.getElementById('pat-status').style.color = 'var(--green)';
+      input.value = '';
+      // Load from gist first, then sync
+      await loadFromGist();
+      await syncToGist();
+    } else {
+      document.getElementById('pat-status').textContent = '❌ 無效的 PAT，請重新確認';
+      document.getElementById('pat-status').style.color = 'var(--red)';
+      setPAT('');
+    }
+  } catch(e) {
+    document.getElementById('pat-status').textContent = '❌ 網路錯誤：' + e.message;
+    document.getElementById('pat-status').style.color = 'var(--red)';
+  }
+}
+
+function togglePatVisibility() {
+  const inp = document.getElementById('pat-input');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SRS
+// ══════════════════════════════════════════════════════════════════
+function getWordKey(w) { return (w.article||'')+'_'+w.word; }
+function getWordState(w) { return progress[getWordKey(w)] || {level:0,due:0,seen:false}; }
+function setWordState(w, s) { progress[getWordKey(w)] = s; saveProgress(progress); }
+const INTERVALS = [0,86400000,259200000,604800000,1209600000,2592000000];
+
+function srsAnswer(w, correct) {
+  const st = getWordState(w);
+  const now = Date.now();
+  let lvl = st.level || 0;
+  if (correct) { lvl = Math.min(5, lvl+1); sessionStreak++; }
+  else { lvl = Math.max(0, lvl-2); sessionStreak = 0; }
+  setWordState(w, {level:lvl, due:now+INTERVALS[lvl], seen:true});
+  if (correct) {
+    const mult = sessionStreak >= 5 ? 3 : sessionStreak >= 3 ? 2 : 1;
+    stats.xp += 10 * mult;
+    stats.totalCorrect = (stats.totalCorrect||0) + 1;
+    if (mult > 1) showToast('🔥 '+mult+'x 連勝！+'+10*mult+' XP');
+  }
+  stats.streak = sessionStreak;
+  saveStats(stats);
+  updateStatsUI();
+  scheduleSyncDebounced();
+}
+
+function getDueWords() {
+  const now = Date.now();
+  return VOCAB.filter(w => { const s=getWordState(w); return !s.seen||s.due<=now; });
+}
+function getLevel() {
+  const xp = stats.xp;
+  const lvls = [[0,'Lv.1 新手',100],[100,'Lv.2 學習者',300],[300,'Lv.3 練習者',600],[600,'Lv.4 中級',1000],[1000,'Lv.5 進階',1500],[1500,'Lv.6 高手',2500],[2500,'Lv.7 達人',4000],[4000,'Lv.8 大師',6000],[6000,'Lv.9 專家',9999]];
+  let cur=lvls[0];
+  for(const l of lvls){if(xp>=l[0])cur=l;else break;}
+  const idx=lvls.indexOf(cur), nxt=lvls[idx+1];
+  const pct=nxt?Math.min(100,((xp-cur[0])/(nxt[0]-cur[0]))*100):100;
+  return{label:cur[1],pct,current:xp-cur[0],total:nxt?nxt[0]-cur[0]:999};
+}
+
+// ══════════════════════════════════════════════════════════════════
+// UI
+// ══════════════════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  if(id==='wordlist') renderWordList();
+  if(id==='settings') renderSettingsStats();
+}
+function updateStatsUI() {
+  const lvl=getLevel(), due=getDueWords().length;
+  const learned=VOCAB.filter(w=>getWordState(w).seen).length;
+  const mastered=VOCAB.filter(w=>(getWordState(w).level||0)>=4).length;
+  document.getElementById('xp-display').textContent=stats.xp+' XP';
+  document.getElementById('xp-bar-mini').style.width=lvl.pct+'%';
+  document.getElementById('streak-badge').textContent='🔥 '+sessionStreak;
+  document.getElementById('level-label').textContent=lvl.label;
+  document.getElementById('xp-label').textContent=lvl.current+'/'+lvl.total+' XP';
+  document.getElementById('xp-bar-main').style.width=lvl.pct+'%';
+  document.getElementById('stat-learned').textContent=learned;
+  document.getElementById('stat-mastered').textContent=mastered;
+  document.getElementById('stat-streak').textContent=sessionStreak;
+  const banner=document.getElementById('due-banner');
+  if(due>0){banner.style.display='flex';document.getElementById('due-count').textContent=due;}
+  else banner.style.display='none';
+  ['flash','quiz','fill','gender'].forEach(id=>{
+    const el=document.getElementById(id+'-streak'); if(el) el.textContent='🔥 '+sessionStreak;
+    const xp=document.getElementById(id+'-xp-display'); if(xp) xp.textContent=stats.xp+' XP';
+  });
+}
+function renderSettingsStats() {
+  const learned=VOCAB.filter(w=>getWordState(w).seen).length;
+  const mastered=VOCAB.filter(w=>(getWordState(w).level||0)>=4).length;
+  document.getElementById('stats-detail').innerHTML =
+    `總單字：${VOCAB.length} 個<br>已學習：${learned} 個<br>已熟悉（Lv4+）：${mastered} 個<br>總 XP：${stats.xp}<br>總答對：${stats.totalCorrect||0} 次<br>當前連勝：${sessionStreak}`;
+}
+function showToast(msg,dur=2000){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);
+}
+function confirmReset(){
+  if(confirm('確定清除所有學習進度？此操作無法復原。')){
+    localStorage.removeItem('de_a1_progress');
+    localStorage.removeItem('de_a1_stats');
+    progress={}; stats={xp:0,streak:0,lastDate:'',totalCorrect:0}; sessionStreak=0;
+    saveStats(stats);
+    setSyncState(getPAT()?'idle':'idle');
+    updateStatsUI();
+    showToast('✅ 進度已清除');
+    syncToGist();
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SPEECH
+// ══════════════════════════════════════════════════════════════════
+let currentWord=null, currentExample=null, quizCurrentWord=null;
+function speak(text,lang='de-DE'){
+  if(!window.speechSynthesis){showToast('瀏覽器不支援語音');return;}
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text); u.lang=lang; u.rate=0.9;
+  window.speechSynthesis.speak(u);
+}
+function speakWord(){if(currentWord)speak((currentWord.article?currentWord.article+' ':'')+currentWord.word);}
+function speakExample(){if(currentExample)speak(currentExample);}
+function speakQuizWord(){if(quizCurrentWord)speak((quizCurrentWord.article?quizCurrentWord.article+' ':'')+quizCurrentWord.word);}
+
+// ══════════════════════════════════════════════════════════════════
+// FLASHCARD
+// ══════════════════════════════════════════════════════════════════
+let flashQueue=[],flashIdx=0,isFlipped=false;
+
+function startMode(mode){
+  if(mode==='flash')startFlash();
+  else if(mode==='quiz')startQuiz();
+  else if(mode==='fill')startFill();
+  else if(mode==='gender')startGender();
+  showScreen(mode);
+}
+function startFlash(){
+  const grp=pickSessionGroup(null);
+  const pool=grp?buildGroupQueue(grp,null,15):shuffle([...getDueWords()]).slice(0,15);
+  if(!pool||pool.length===0){showToast('🎉 今天沒有待複習的單字！');return;}
+  flashQueue=[...pool]; flashIdx=0; isFlipped=false;
+  document.getElementById('flashcard').classList.remove('flipped');
+  document.getElementById('card-actions').style.display='none';
+  document.getElementById('card-actions-hint').style.display='block';
+  showFlashCard();
+}
+function showFlashCard(){
+  if(flashIdx>=flashQueue.length){showToast('🎉 本輪完成！');setTimeout(()=>showScreen('home'),600);return;}
+  const w=flashQueue[flashIdx]; currentWord=w; currentExample=w.examples&&w.examples[0]?w.examples[0]:null;
+  isFlipped=false;
+  document.getElementById('flashcard').classList.remove('flipped');
+  document.getElementById('card-actions').style.display='none';
+  document.getElementById('card-actions-hint').style.display='block';
+  const posMap={noun:'名詞',verb:'動詞',other:'副詞/介詞',exclamation:'感嘆詞',noun_no_article:'名詞'};
+  document.getElementById('card-pos').textContent=posMap[w.pos]||'';
+  document.getElementById('card-article').textContent=w.article||'';
+  document.getElementById('card-word').textContent=w.word;
+  document.getElementById('card-plural').textContent=w.plural?'複數: '+w.plural:'';
+  document.getElementById('card-emoji').textContent=w.emoji||'📖';
+  document.getElementById('card-translation').textContent=w.translation||'';
+  document.getElementById('card-english').textContent=w.english?'🇬🇧 '+w.english:'';
+  let ex=currentExample||'';
+  if(ex&&w.word){const re=new RegExp(w.word,'gi');ex=ex.replace(re,m=>`<strong>${m}</strong>`);}
+  document.getElementById('card-example').innerHTML=ex;
+  const pct=(flashIdx/flashQueue.length)*100;
+  document.getElementById('flash-progress-bar').style.width=pct+'%';
+  document.getElementById('flash-progress-text').textContent=flashIdx+'/'+flashQueue.length;
+  const lvl=getLevel(); document.getElementById('flash-xp-bar').style.width=lvl.pct+'%';
+}
+function flipCard(){
+  if(!isFlipped){
+    isFlipped=true;
+    document.getElementById('flashcard').classList.add('flipped');
+    document.getElementById('card-actions').style.display='flex';
+    document.getElementById('card-actions-hint').style.display='none';
+  }
+}
+function cardAnswer(correct){
+  const w=flashQueue[flashIdx];
+  srsAnswer(w,correct);
+  flashIdx++;
+  if(!correct){ flashQueue.push(w); }
+  showFlashCard();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// QUIZ
+// ══════════════════════════════════════════════════════════════════
+let quizQueue=[],quizIdx=0,quizCorrectN=0,quizWrongN=0,quizLocked=false;
+
+function startQuiz(){
+  const grp=pickSessionGroup(null);
+  const pool=grp?buildGroupQueue(grp,null,15):shuffle([...getDueWords()]).slice(0,15);
+  quizQueue=[...(pool&&pool.length?pool:shuffle([...VOCAB]).slice(0,15))];
+  quizIdx=0;quizCorrectN=0;quizWrongN=0;
+  document.getElementById('quiz-correct').textContent='0';
+  document.getElementById('quiz-wrong-count').textContent='0';
+  showQuizQuestion();
+}
+function showQuizQuestion(){
+  if(quizIdx>=quizQueue.length){showToast('🎉 本輪完成！');setTimeout(()=>showScreen('home'),600);return;}
+  quizLocked=false;
+  const w=quizQueue[quizIdx]; quizCurrentWord=w;
+  document.getElementById('quiz-progress-bar').style.width=((quizIdx/quizQueue.length)*100)+'%';
+  document.getElementById('quiz-progress-text').textContent=(quizIdx+1)+'/'+quizQueue.length;
+  document.getElementById('quiz-q-article').textContent=w.article||'';
+  document.getElementById('quiz-q-word').textContent=w.word;
+  document.getElementById('quiz-q-hint').textContent=w.pos==='noun'&&w.plural?'複數: '+w.plural:'';
+  const wrongs=shuffle(VOCAB.filter(x=>getWordKey(x)!==getWordKey(w)&&x.translation)).slice(0,3);
+  const choices=shuffle([w,...wrongs]);
+  const container=document.getElementById('choices'); container.innerHTML='';
+  choices.forEach(c=>{
+    const btn=document.createElement('button'); btn.className='choice-btn';
+    btn.innerHTML=`<div style="font-size:.88rem">${c.english||c.translation}</div>`;
+    btn.dataset.key=getWordKey(c);
+    btn.onclick=()=>answerQuiz(c,w,btn);
+    container.appendChild(btn);
+  });
+  document.getElementById('quiz-next-btn').classList.remove('visible');
+  // Auto-play on question load
+  setTimeout(()=>speakQuizWord(), 300);
+}
+function answerQuiz(chosen,correct,btn){
+  if(quizLocked)return; quizLocked=true;
+  const isCorrect=getWordKey(chosen)===getWordKey(correct);
+  document.querySelectorAll('.choice-btn').forEach(b=>{
+    b.classList.add('locked');
+    if(b.dataset.key===getWordKey(correct))b.classList.add(isCorrect&&b===btn?'correct':'reveal');
+  });
+  if(!isCorrect){btn.classList.remove('reveal');btn.classList.add('wrong');}
+  if(isCorrect){quizCorrectN++;document.getElementById('quiz-correct').textContent=quizCorrectN;}
+  else{quizWrongN++;document.getElementById('quiz-wrong-count').textContent=quizWrongN;}
+  srsAnswer(correct,isCorrect);
+  if(!isCorrect){ quizQueue.push(correct); }
+  quizIdx++;
+  setTimeout(showQuizQuestion, isCorrect ? 600 : 1200);
+}
+function nextQuizQuestion(){showQuizQuestion();}
+
+// ══════════════════════════════════════════════════════════════════
+// FILL-IN
+// ══════════════════════════════════════════════════════════════════
+let fillQueue=[],fillIdx=0,fillCorrectN=0,fillWrongN=0,fillCurrentWord=null,fillLocked=false;
+
+function startFill(){
+  const hasEx=VOCAB.filter(w=>w.examples&&w.examples.length>0&&w.word.length>2);
+  const due=getDueWords().filter(w=>w.examples&&w.examples.length>0&&w.word.length>2);
+  const pool=due.length>=5?due:hasEx;
+  fillQueue=shuffle([...pool]).slice(0,15);
+  fillIdx=0;fillCorrectN=0;fillWrongN=0;fillLocked=false;
+  document.getElementById('fill-correct').textContent='0';
+  document.getElementById('fill-wrong-count').textContent='0';
+  showFillQuestion();
+}
+function showFillQuestion(){
+  if(fillIdx>=fillQueue.length){showToast('🎉 本輪完成！');setTimeout(()=>showScreen('home'),600);return;}
+  fillLocked=false;
+  const w=fillQueue[fillIdx]; fillCurrentWord=w;
+  document.getElementById('fill-progress-bar').style.width=((fillIdx/fillQueue.length)*100)+'%';
+  document.getElementById('fill-progress-text').textContent=(fillIdx+1)+'/'+fillQueue.length;
+  const ex=w.examples[0];
+  const re=new RegExp(w.word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');
+  const blanked=ex.replace(re,m=>'<span class="fill-blank">'+'＿'.repeat(Math.min(6,m.length))+'</span>');
+  document.getElementById('fill-sentence').innerHTML=blanked;
+  document.getElementById('fill-zh').textContent='🀄 '+(w.article?'('+w.article+') ':'')+w.translation;
+  document.getElementById('fill-en').textContent='🇬🇧 '+( w.english||'');
+  const inp=document.getElementById('fill-input');
+  inp.value=''; inp.className='fill-input'; inp.disabled=false;
+  document.getElementById('fill-feedback').textContent='';
+  document.getElementById('fill-feedback').style.color='';
+  setTimeout(()=>inp.focus(),100);
+}
+function checkFill(){
+  if(fillLocked||!fillCurrentWord)return;
+  const answer=document.getElementById('fill-input').value.trim();
+  if(!answer)return;
+  const correct=fillCurrentWord.word;
+  const isCorrect=answer.toLowerCase()===correct.toLowerCase();
+  const inp=document.getElementById('fill-input'), fb=document.getElementById('fill-feedback');
+  if(isCorrect){
+    inp.classList.add('correct'); fb.textContent='✅ 正確！'; fb.style.color='var(--green)';
+    fillCorrectN++; document.getElementById('fill-correct').textContent=fillCorrectN;
+    srsAnswer(fillCurrentWord,true); fillLocked=true; fillIdx++;
+    setTimeout(showFillQuestion,1200);
+  } else {
+    inp.classList.add('wrong'); fb.textContent='❌ 正確答案：'+correct; fb.style.color='var(--red)';
+    fillWrongN++; document.getElementById('fill-wrong-count').textContent=fillWrongN;
+    srsAnswer(fillCurrentWord,false); fillLocked=true; inp.disabled=true; fillIdx++;
+    setTimeout(showFillQuestion,2000);
+  }
+}
+function skipFill(){
+  if(fillLocked)return;
+  document.getElementById('fill-feedback').textContent='⏭ 答案：'+(fillCurrentWord?fillCurrentWord.word:'');
+  document.getElementById('fill-feedback').style.color='var(--text2)';
+  fillIdx++; setTimeout(showFillQuestion,1500);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// GENDER QUIZ
+// ══════════════════════════════════════════════════════════════════
+let genderQueue=[],genderIdx=0,genderCorrectN=0,genderWrongN=0,genderCurrentWord=null,genderLocked=false;
+
+function startGender(){
+  const isNoun=w=>w.article&&['der','die','das'].includes(w.article);
+  const grp=pickSessionGroup(isNoun);
+  let pool=grp?buildGroupQueue(grp,isNoun,15):null;
+  if(!pool||pool.length<5){
+    const due=getDueWords().filter(isNoun);
+    pool=due.length>=5?shuffle([...due]).slice(0,15):shuffle(VOCAB.filter(isNoun)).slice(0,15);
+  }
+  genderQueue=[...pool];
+  genderIdx=0;genderCorrectN=0;genderWrongN=0;
+  document.getElementById('gender-correct').textContent='0';
+  document.getElementById('gender-wrong-count').textContent='0';
+  showGenderQuestion();
+}
+
+function showGenderQuestion(){
+  if(genderIdx>=genderQueue.length){showToast('🎉 本輪完成！');setTimeout(()=>showScreen('home'),600);return;}
+  genderLocked=false;
+  const w=genderQueue[genderIdx]; genderCurrentWord=w;
+  document.getElementById('gender-progress-bar').style.width=((genderIdx/genderQueue.length)*100)+'%';
+  document.getElementById('gender-progress-text').textContent=(genderIdx+1)+'/'+genderQueue.length;
+  document.getElementById('gender-q-word').textContent=w.word;
+  document.getElementById('gender-q-plural').textContent=w.plural?'複數: '+w.plural:'';
+  document.getElementById('gender-q-translation').textContent=w.translation||'';
+  document.getElementById('gender-q-english').textContent=w.english?'🇬🇧 '+w.english:'';
+  document.getElementById('gender-feedback').textContent='';
+  document.getElementById('gender-xp-display').textContent=stats.xp+' XP';
+  // Reset buttons
+  ['der','die','das'].forEach(a=>{
+    const b=document.getElementById('gbtn-'+a);
+    b.classList.remove('correct','wrong','reveal','locked');
+  });
+}
+
+function speakGenderWord(){
+  if(genderCurrentWord) speak(genderCurrentWord.word);
+}
+
+function answerGender(chosen){
+  if(genderLocked||!genderCurrentWord)return;
+  genderLocked=true;
+  const correct=genderCurrentWord.article;
+  const isCorrect=chosen===correct;
+  ['der','die','das'].forEach(a=>{
+    const b=document.getElementById('gbtn-'+a);
+    b.classList.add('locked');
+    if(a===correct) b.classList.add(isCorrect&&a===chosen?'correct':'reveal');
+  });
+  if(!isCorrect){
+    document.getElementById('gbtn-'+chosen).classList.remove('reveal');
+    document.getElementById('gbtn-'+chosen).classList.add('wrong');
+  }
+  const fb=document.getElementById('gender-feedback');
+  if(isCorrect){
+    genderCorrectN++; document.getElementById('gender-correct').textContent=genderCorrectN;
+    fb.textContent='✅ 正確！'; fb.style.color='var(--green)';
+  } else {
+    genderWrongN++; document.getElementById('gender-wrong-count').textContent=genderWrongN;
+    fb.textContent='❌ 正確答案：'+correct+' '+genderCurrentWord.word;
+    fb.style.color='var(--red)';
+  }
+  srsAnswer(genderCurrentWord,isCorrect);
+  if(!isCorrect){ genderQueue.push(genderCurrentWord); }
+  genderIdx++;
+  setTimeout(showGenderQuestion, isCorrect?600:1400);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// WORDLIST
+// ══════════════════════════════════════════════════════════════════
+let wordlistFilter='all';
+function setFilter(f,el){
+  wordlistFilter=f;
+  document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active'); filterWordList();
+}
+function filterWordList(){
+  const q=document.getElementById('search-input').value.toLowerCase(), now=Date.now();
+  let items=VOCAB.filter(w=>{
+    const st=getWordState(w);
+    if(wordlistFilter==='due')return !st.seen||st.due<=now;
+    if(wordlistFilter==='new')return !st.seen;
+    if(wordlistFilter==='noun')return w.pos==='noun'||w.pos==='noun_no_article';
+    if(wordlistFilter==='verb')return w.pos==='verb';
+    if(wordlistFilter==='other')return w.pos==='other'||w.pos==='exclamation';
+    return true;
+  }).filter(w=>{
+    if(!q)return true;
+    return w.word.toLowerCase().includes(q)||(w.translation||'').includes(q)||(w.english||'').toLowerCase().includes(q)||(w.article||'').includes(q);
+  });
+  document.getElementById('wordlist-count').textContent=items.length+' 字';
+  renderWordListItems(items);
+}
+function renderWordList(){filterWordList();}
+function renderWordListItems(items){
+  const ll=['新','初','初','中','熟','精'];
+  const posLabel={noun:'名詞',noun_no_article:'名詞',verb:'動詞',other:'副詞/介詞',exclamation:'感嘆詞'};
+  document.getElementById('wordlist-body').innerHTML=items.map(w=>{
+    const st=getWordState(w), lvl=st.level||0;
+    const posTag=(w.pos!=='noun'&&w.pos!=='noun_no_article'&&posLabel[w.pos])
+      ?`<span style="font-size:.65rem;background:var(--border);color:var(--text2);padding:1px 5px;border-radius:6px;margin-left:5px">${posLabel[w.pos]}</span>`:'';
+    return `<div class="word-item" onclick="speak('${escHtml((w.article?w.article+' ':'')+w.word)}')">
+      <div class="w-emoji">${w.emoji||'📖'}</div>
+      <div style="flex:1;min-width:0">
+        <div class="w-de"><span class="w-article">${w.article||''}</span>${escHtml(w.word)}${w.plural?` <span style="color:var(--text2);font-size:.7rem">(${escHtml(w.plural)})</span>`:''}${posTag}</div>
+        <div class="w-zh">${escHtml(w.translation||'')}</div>
+        <div class="w-en">${escHtml(w.english||'')}</div>
+      </div>
+      <div class="w-level level-${lvl}">${ll[lvl]}</div>
+    </div>`;
+  }).join('');
+}
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+// ══════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════
+updateStatsUI();
+if(getPAT()) {
+  setSyncState('syncing','啟動時同步...');
+  loadFromGist().then(loaded => {
+    if(!loaded) syncToGist();
+  });
+} else {
+  setSyncState('idle','未設定同步');
+}
+</script>
+</body>
+</html>
