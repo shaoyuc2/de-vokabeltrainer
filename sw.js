@@ -1,5 +1,5 @@
 const CACHE = 'de-vokabeltrainer-v1';
-const FILES = ['./', './index.html', './sw.js', './manifest.json', './icon-192.svg', './icon-512.svg'];
+const FILES = ['./', './index.html', './manifest.json', './icon-192.svg', './icon-512.svg'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));
@@ -21,8 +21,10 @@ self.addEventListener('fetch', e => {
   if (url.origin !== self.location.origin) return;
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
-      const clone = res.clone();
-      caches.open(CACHE).then(c => c.put(e.request, clone));
+      if (res && res.status === 200) {
+        const clone = res.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone));
+      }
       return res;
     }))
   );
