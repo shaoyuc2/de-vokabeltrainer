@@ -840,6 +840,7 @@ function confirmReset(){
 // ══════════════════════════════════════════════════════════════════
 // SPEECH
 // ══════════════════════════════════════════════════════════════════
+const AUTO_PLAY_DELAY_MS = 300;
 let currentWord=null, currentExample=null, quizCurrentWord=null;
 function speak(text,lang='de-DE'){
   if(!window.speechSynthesis){showToast('瀏覽器不支援語音');return;}
@@ -891,6 +892,7 @@ function showFlashCard(){
   let ex=currentExample||'';
   if(ex&&w.word){const re=new RegExp(w.word,'gi');ex=ex.replace(re,m=>`<strong>${m}</strong>`);}
   document.getElementById('card-example').innerHTML=ex;
+  setTimeout(()=>speakWord(), AUTO_PLAY_DELAY_MS);
   const pct=(flashIdx/flashQueue.length)*100;
   document.getElementById('flash-progress-bar').style.width=pct+'%';
   document.getElementById('flash-progress-text').textContent=flashIdx+'/'+flashQueue.length;
@@ -947,7 +949,7 @@ function showQuizQuestion(){
   });
   document.getElementById('quiz-next-btn').classList.remove('visible');
   // Auto-play on question load
-  setTimeout(()=>speakQuizWord(), 300);
+  setTimeout(()=>speakQuizWord(), AUTO_PLAY_DELAY_MS);
 }
 function answerQuiz(chosen,correct,btn){
   if(quizLocked)return; quizLocked=true;
@@ -1057,6 +1059,7 @@ function showGenderQuestion(){
   document.getElementById('gender-q-english').textContent=w.english?'🇬🇧 '+w.english:'';
   document.getElementById('gender-feedback').textContent='';
   document.getElementById('gender-xp-display').textContent=stats.xp+' XP';
+  setTimeout(()=>speakGenderWord(), AUTO_PLAY_DELAY_MS);
   // Reset buttons
   ['der','die','das'].forEach(a=>{
     const b=document.getElementById('gbtn-'+a);
